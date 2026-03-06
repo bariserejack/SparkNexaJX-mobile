@@ -1,0 +1,65 @@
+{
+  "expo": {
+    "name": "SparkNexaJX",
+    "slug": "SparkNexaJX",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/brand.logo.png",
+    "scheme": "sparknexajx",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/images/brand.logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sparknexa.jx",
+      "userInterfaceStyle": "dark",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.sparknexa.jx",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/brand.logo.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/images/brand.logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-notifications",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFFFFF",
+          "image": "./assets/images/brand.logo.png",
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "extra": {
+      "router": {
+        "origin": false,
+        "root": "app"
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">sparknexajx</string>
+    <string name="title_activity_main">sparknexajx</string>
+    <string name="package_name">com.sparknexa.jx</string>
+    <string name="custom_url_scheme">com.sparknexa.jx</string>
+</resources>
