@@ -113,7 +113,7 @@ export default function EditProfileScreen() {
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={[styles.header, { borderBottomColor: activeTheme.border }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={26} color={activeTheme.text} />
+            <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Edit profile</Text>
           <View style={styles.headerSpacer} />
@@ -135,7 +135,7 @@ export default function EditProfileScreen() {
               <Text style={[styles.avatarText, { color: activeTheme.text }]}>AR</Text>
             </View>
             <TouchableOpacity style={[styles.avatarCamera, { borderColor: activeTheme.border, backgroundColor: activeTheme.card }]}>
-              <Ionicons name="camera-outline" size={14} color={activeTheme.text} />
+              <Ionicons name="camera-outline" size={16} color={activeTheme.text} />
               <View style={styles.iconAccent} />
             </TouchableOpacity>
           </View>
@@ -153,7 +153,7 @@ export default function EditProfileScreen() {
             <View key={section.title} style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <Text style={[styles.sectionTitle, { color: activeTheme.text }]}>{section.title}</Text>
-                {section.collapsible ? <Ionicons name="chevron-up" size={18} color={activeTheme.textMuted} /> : null}
+                {section.collapsible ? <Ionicons name="chevron-up" size={16} color={activeTheme.textMuted} /> : null}
               </View>
               <View style={[styles.listCard, { borderColor: activeTheme.border, backgroundColor: activeTheme.card }]}>
                 {section.items.map((item, idx) => (
@@ -183,12 +183,12 @@ function EditRow({ item, theme }: { item: EditItem; theme: any }) {
         {item.sub ? <Text style={[styles.rowSub, { color: theme.textMuted }]}>{item.sub}</Text> : null}
         {item.visibility ? (
           <View style={styles.visibilityRow}>
-            <Ionicons name={item.visibility === 'Public' ? 'globe-outline' : 'lock-closed-outline'} size={12} color={theme.textMuted} />
+            <Ionicons name={item.visibility === 'Public' ? 'globe-outline' : 'lock-closed-outline'} size={16} color={theme.textMuted} />
             <Text style={[styles.visibilityText, { color: theme.textMuted }]}>{item.visibility}</Text>
           </View>
         ) : null}
       </View>
-      {item.editable ? <Ionicons name="create-outline" size={18} color={theme.textMuted} /> : null}
+      {item.editable ? <Ionicons name="create-outline" size={16} color={theme.textMuted} /> : null}
     </TouchableOpacity>
   );
 }

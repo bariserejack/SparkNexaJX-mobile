@@ -83,7 +83,7 @@ export default function AnalyticsScreen() {
               style={[styles.iconCircle, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}
               onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
             >
-              <Ionicons name="scan-outline" size={20} color={primaryColor} />
+              <Ionicons name="scan-outline" size={16} color={primaryColor} />
             </TouchableOpacity>
           </View>
 
@@ -101,7 +101,7 @@ export default function AnalyticsScreen() {
                   <Text style={styles.heroBadgeText}>⚡ Optimized</Text>
                 </View>
               </View>
-              <Ionicons name="pulse" size={100} color="rgba(255,255,255,0.15)" style={styles.heroIcon} />
+              <Ionicons name="pulse" size={16} color="rgba(255,255,255,0.15)" style={styles.heroIcon} />
             </LinearGradient>
           </TouchableOpacity>
 
@@ -147,7 +147,7 @@ export default function AnalyticsScreen() {
                   <Text style={[styles.leaderScore, { color: primaryColor }]}>{user.score}</Text>
                   <Ionicons 
                     name={user.trend === 'up' ? "caret-up" : "caret-down"} 
-                    size={12} 
+                    size={16} 
                     color={user.trend === 'up' ? "#4ADE80" : "#FF3B30"} 
                   />
                 </View>
@@ -166,7 +166,7 @@ function MetricCard({ label, value, color, icon }: any) {
   return (
     <View style={styles.miniCard}>
       <View style={[styles.iconBox, { backgroundColor: color + '15' }]}>
-        <Ionicons name={icon} size={18} color={color} />
+        <Ionicons name={icon} size={16} color={color} />
       </View>
       <View>
         <Text style={styles.miniLabel}>{label}</Text>

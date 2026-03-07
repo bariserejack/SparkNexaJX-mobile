@@ -178,7 +178,7 @@ export default function SignUpScreen() {
           <View style={styles.header}>
             <View style={styles.topRow}>
               <TouchableOpacity style={styles.backBtn} onPress={() => (step > 1 ? setStep((step - 1) as Step) : router.back())}>
-                <Ionicons name="chevron-back" size={20} color={palette.text} />
+                <Ionicons name="chevron-back" size={16} color={palette.text} />
               </TouchableOpacity>
               <Text style={styles.stepLabel}>
                 Step {step} of {phone ? 4 : 3}
@@ -206,7 +206,7 @@ export default function SignUpScreen() {
               <>
                 <Text style={styles.label}>Full Name</Text>
                 <View style={styles.inputWrap}>
-                  <Ionicons name="person-outline" size={18} color={palette.textMuted} />
+                  <Ionicons name="person-outline" size={16} color={palette.textMuted} />
                   <TextInput
                     style={styles.input}
                     value={fullName}
@@ -217,7 +217,7 @@ export default function SignUpScreen() {
                 </View>
                 <Text style={styles.label}>Date of Birth</Text>
                 <View style={styles.inputWrap}>
-                  <Ionicons name="calendar-outline" size={18} color={palette.textMuted} />
+                  <Ionicons name="calendar-outline" size={16} color={palette.textMuted} />
                   <TextInput
                     style={styles.input}
                     value={dateOfBirth}
@@ -228,7 +228,7 @@ export default function SignUpScreen() {
                 </View>
                 <Text style={styles.label}>Gender</Text>
                 <View style={styles.inputWrap}>
-                  <Ionicons name="transgender-outline" size={18} color={palette.textMuted} />
+                  <Ionicons name="transgender-outline" size={16} color={palette.textMuted} />
                   <TextInput
                     style={styles.input}
                     value={gender}
@@ -239,7 +239,7 @@ export default function SignUpScreen() {
                 </View>
                 <TouchableOpacity style={styles.cta} onPress={goNext}>
                   <Text style={styles.ctaText}>Continue</Text>
-                  <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+                  <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
                 </TouchableOpacity>
               </>
             )}
@@ -248,7 +248,7 @@ export default function SignUpScreen() {
               <>
                 <Text style={styles.label}>Email</Text>
                 <View style={styles.inputWrap}>
-                  <Ionicons name="mail-outline" size={18} color={palette.textMuted} />
+                  <Ionicons name="mail-outline" size={16} color={palette.textMuted} />
                   <TextInput
                     style={styles.input}
                     value={email}
@@ -261,7 +261,7 @@ export default function SignUpScreen() {
                 </View>
                 <Text style={styles.label}>Phone (optional)</Text>
                 <View style={styles.inputWrap}>
-                  <Ionicons name="call-outline" size={18} color={palette.textMuted} />
+                  <Ionicons name="call-outline" size={16} color={palette.textMuted} />
                   <TextInput
                     style={styles.input}
                     value={phone}
@@ -273,7 +273,7 @@ export default function SignUpScreen() {
                 </View>
                 <TouchableOpacity style={styles.cta} onPress={goNext}>
                   <Text style={styles.ctaText}>Continue</Text>
-                  <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+                  <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
                 </TouchableOpacity>
               </>
             )}
@@ -282,7 +282,7 @@ export default function SignUpScreen() {
               <>
                 <Text style={styles.label}>Password</Text>
                 <View style={styles.inputWrap}>
-                  <Ionicons name="lock-closed-outline" size={18} color={palette.textMuted} />
+                  <Ionicons name="lock-closed-outline" size={16} color={palette.textMuted} />
                   <TextInput
                     style={styles.input}
                     value={password}
@@ -292,7 +292,7 @@ export default function SignUpScreen() {
                     placeholderTextColor="#94A3B8"
                   />
                   <TouchableOpacity onPress={() => setShowPassword((prev) => !prev)}>
-                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={palette.textMuted} />
+                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={16} color={palette.textMuted} />
                   </TouchableOpacity>
                 </View>
 
@@ -314,7 +314,7 @@ export default function SignUpScreen() {
                   ) : (
                     <>
                       <Text style={styles.ctaText}>Create Account</Text>
-                      <Ionicons name="checkmark" size={18} color="#FFFFFF" />
+                      <Ionicons name="checkmark" size={16} color="#FFFFFF" />
                     </>
                   )}
                 </TouchableOpacity>
@@ -334,7 +334,7 @@ export default function SignUpScreen() {
               <>
                 <Text style={styles.label}>Verification code</Text>
                 <View style={styles.inputWrap}>
-                  <Ionicons name="key-outline" size={18} color={palette.textMuted} />
+                  <Ionicons name="key-outline" size={16} color={palette.textMuted} />
                   <TextInput
                     style={styles.input}
                     value={verificationCode}

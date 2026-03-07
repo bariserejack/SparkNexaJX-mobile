@@ -15,21 +15,39 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useState } from "react";
+import Animated, { FadeInRight } from 'react-native-reanimated';
 import * as ImagePicker from 'expo-image-picker';
 import { Theme } from "../../constants/Theme";
 import { useAppTheme } from "../../lib/theme";
 
 const { width } = Dimensions.get('window');
 
+const NEWS_CATEGORIES: Array<{
+    key: string;
+    label: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    accent: string;
+}> = [
+    { key: 'all', label: 'All', icon: 'apps-outline', accent: '#7367f0' },
+    { key: 'ai', label: 'AI', icon: 'sparkles-outline', accent: '#00d2ff' },
+    { key: 'tech', label: 'Tech', icon: 'hardware-chip-outline', accent: '#4facfe' },
+    { key: 'design', label: 'Design', icon: 'color-palette-outline', accent: '#ce9ffc' },
+    { key: 'dev', label: 'Dev', icon: 'code-slash-outline', accent: '#32cc70' },
+    { key: 'security', label: 'Security', icon: 'shield-checkmark-outline', accent: '#fb7185' },
+    { key: 'data', label: 'Data', icon: 'bar-chart-outline', accent: '#f59e0b' },
+    { key: 'product', label: 'Product', icon: 'grid-outline', accent: '#22c55e' },
+    { key: 'cloud', label: 'Cloud', icon: 'cloud-outline', accent: '#38bdf8' },
+];
+
 export default function ExploreScreen() {
     const { activeTheme, isDark } = useAppTheme();
     const navigation = useNavigation();
     
     const [searchQuery, setSearchQuery] = useState("");
-    const [activeFilter, setActiveFilter] = useState("AI");
+    const [activeFilter, setActiveFilter] = useState<string>('all');
     const [selectedBolt, setSelectedBolt] = useState<any>(null);
 
-    const categories = ["AI", "Tech", "Design", "Dev"];
+    const selectedCategory = NEWS_CATEGORIES.find((cat) => cat.key === activeFilter) ?? NEWS_CATEGORIES[0];
 
     const openDrawer = () => {
         const parent = (navigation as any).getParent?.();
@@ -68,14 +86,14 @@ export default function ExploreScreen() {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
                 <View style={styles.topBar}>
                     <TouchableOpacity style={styles.topAction} onPress={openDrawer}>
-                        <Ionicons name="reorder-three-outline" size={24} color={activeTheme.text} />
+                        <Ionicons name="reorder-three-outline" size={16} color={activeTheme.text} />
                     </TouchableOpacity>
                     <View style={styles.topCenter}>
                         <Text style={styles.topLabel}>DISCOVERY NODE</Text>
                         <Text style={[styles.topTitle, { color: activeTheme.text }]}>Explore</Text>
                     </View>
                     <TouchableOpacity style={styles.topAction} onPress={() => router.push('/settings')}>
-                        <Ionicons name="settings-outline" size={21} color={activeTheme.text} />
+                        <Ionicons name="settings-outline" size={16} color={activeTheme.text} />
                     </TouchableOpacity>
                 </View>
 
@@ -89,7 +107,7 @@ export default function ExploreScreen() {
                         tint={activeTheme.tint as any} 
                         style={[styles.searchGlass, { borderColor: activeTheme.border }]}
                     >
-                        <Ionicons name="search" size={20} color={activeTheme.textMuted} />
+                        <Ionicons name="search" size={16} color={activeTheme.textMuted} />
                         <TextInput 
                             placeholder="Search the network..." 
                             placeholderTextColor={activeTheme.textMuted}
@@ -131,26 +149,35 @@ export default function ExploreScreen() {
                         Neural News
                     </Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterBar}>
-                        {categories.map((cat) => (
-                            <TouchableOpacity 
-                                key={cat} 
-                                onPress={() => setActiveFilter(cat)}
-                                style={[
-                                    styles.filterChip, 
-                                    { backgroundColor: activeFilter === cat ? Theme.brand.primary : activeTheme.card },
-                                    { borderColor: activeTheme.border }
-                                ]}
-                            >
-                                <Text style={[styles.filterText, { color: activeFilter === cat ? "#FFF" : activeTheme.textMuted }]}>
-                                    {cat}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
+                        {NEWS_CATEGORIES.map((cat, index) => {
+                            const active = activeFilter === cat.key;
+                            return (
+                                <Animated.View key={cat.key} entering={FadeInRight.delay(index * 55).springify()}>
+                                    <TouchableOpacity 
+                                        onPress={() => setActiveFilter(cat.key)}
+                                        style={[
+                                            styles.filterChip, 
+                                            { backgroundColor: active ? Theme.brand.primary : activeTheme.card },
+                                            { borderColor: active ? Theme.brand.primary : activeTheme.border }
+                                        ]}
+                                    >
+                                        <Ionicons
+                                            name={cat.icon}
+                                            size={16}
+                                            color={active ? "#FFF" : cat.accent}
+                                        />
+                                        <Text style={[styles.filterText, { color: active ? "#FFF" : activeTheme.textMuted }]}>
+                                            {cat.label}
+                                        </Text>
+                                    </TouchableOpacity>
+                                </Animated.View>
+                            );
+                        })}
                     </ScrollView>
                     
                     <NewsCard 
-                        title={`${activeFilter} Update`} 
-                        snippet={`New protocols detected in ${activeFilter} development for 2026.`} 
+                        title={`${selectedCategory.label} Update`} 
+                        snippet={`New protocols detected in ${selectedCategory.label} development for 2026.`} 
                         time="Just now" 
                         theme={activeTheme} 
                     />
@@ -165,7 +192,7 @@ export default function ExploreScreen() {
                     colors={Theme.brand.primaryGradient as [string, string, ...string[]]} 
                     style={styles.fabGradient}
                 >
-                    <Ionicons name="add" size={32} color="#FFF" />
+                    <Ionicons name="add" size={16} color="#FFF" />
                 </LinearGradient>
             </TouchableOpacity>
 
@@ -178,7 +205,7 @@ export default function ExploreScreen() {
                     />
                     <TouchableOpacity style={styles.closeVideo} onPress={() => setSelectedBolt(null)}>
                         <BlurView intensity={40} tint={isDark ? 'dark' : 'light'} style={styles.closeBlur}>
-                            <Ionicons name="close" size={28} color={isDark ? "#FFF" : "#000"} />
+                            <Ionicons name="close" size={16} color={isDark ? "#FFF" : "#000"} />
                         </BlurView>
                     </TouchableOpacity>
                     <Text style={[styles.videoPlaceholderText, { color: isDark ? Theme.brand.primary : '#333' }]}>
@@ -207,7 +234,7 @@ function BoltCard({ username, views, gradient, onPress }: any) {
                 style={styles.boltGradient}
             >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-                    <Ionicons name="play" size={12} color={Theme.brand.primary} />
+                    <Ionicons name="play" size={16} color={Theme.brand.primary} />
                     <Text style={styles.boltViews}>{views}</Text>
                 </View>
                 <Text style={styles.boltUser}>@{username}</Text>
@@ -271,7 +298,15 @@ const styles = StyleSheet.create({
     sectionTitle: { fontSize: 22, fontWeight: "900", letterSpacing: -0.5 },
     viewAll: { color: Theme.brand.primary, fontWeight: '800', fontSize: 12, textTransform: 'uppercase' },
     filterBar: { paddingLeft: 25, marginBottom: 20, gap: 10 },
-    filterChip: { paddingHorizontal: 22, paddingVertical: 12, borderRadius: 16, borderWidth: 1 },
+    filterChip: {
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 16,
+        borderWidth: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 7,
+    },
     filterText: { fontWeight: '800', fontSize: 13 },
     boltScroll: { paddingLeft: 25, gap: 15 },
     boltCard: { width: 140, height: 220, borderRadius: 32, backgroundColor: '#1A1A1E', overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },

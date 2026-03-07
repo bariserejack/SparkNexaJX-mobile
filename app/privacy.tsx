@@ -17,7 +17,7 @@ export default function PrivacyScreen() {
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={[styles.header, { borderBottomColor: activeTheme.border }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={26} color={activeTheme.text} />
+            <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Privacy</Text>
           <View style={styles.headerSpacer} />
@@ -66,7 +66,7 @@ export default function PrivacyScreen() {
             <Divider theme={activeTheme} />
             <PrivacyRow label="Contacts" sub="Block contacts, SparkNexa contacts" theme={activeTheme} />
             <Divider theme={activeTheme} />
-            <PrivacyRow label="App lock" sub="Enabled immediately" theme={activeTheme} />
+            <PrivacyRow label="App lock" sub="Enabled immediately" onPress={() => router.push('/app-lock')} theme={activeTheme} />
             <Divider theme={activeTheme} />
             <PrivacyRow label="Chat lock" theme={activeTheme} />
             <Divider theme={activeTheme} />

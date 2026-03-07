@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
+  Animated,
   Alert,
   KeyboardAvoidingView,
   Modal,
@@ -48,11 +49,11 @@ const CHAT_METADATA: Record<string, { favorite: boolean; group: boolean }> = {
   'Project Atlas': { favorite: false, group: true },
 };
 
-const CHAT_CATEGORIES: Array<{ key: ChatCategory; label: string }> = [
-  { key: 'all', label: 'All' },
-  { key: 'unread', label: 'Unread' },
-  { key: 'favorites', label: 'Favorites' },
-  { key: 'groups', label: 'Groups' },
+const CHAT_CATEGORIES: Array<{ key: ChatCategory; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
+  { key: 'all', label: 'All', icon: 'chatbubbles-outline' },
+  { key: 'unread', label: 'Unread', icon: 'mail-unread-outline' },
+  { key: 'favorites', label: 'Favorites', icon: 'star-outline' },
+  { key: 'groups', label: 'Groups', icon: 'people-circle-outline' },
 ];
 
 const CHAT_THEME_OPTIONS = ['Default', 'Ocean', 'Sunset', 'Mono'] as const;
@@ -72,6 +73,9 @@ export default function ChatScreen() {
   const [enterIsSend, setEnterIsSend] = useState(false);
   const [mediaVisibility, setMediaVisibility] = useState(false);
   const [keepChatsArchived, setKeepChatsArchived] = useState(true);
+  const [filtersHidden, setFiltersHidden] = useState(false);
+  const filterAnim = useRef(new Animated.Value(0)).current;
+  const lastOffsetY = useRef(0);
 
   const q = searchQuery.trim().toLowerCase();
   const filteredNodes = useMemo(
@@ -105,6 +109,43 @@ export default function ChatScreen() {
     setChatFontSize(CHAT_FONT_SIZE_OPTIONS[nextIndex]);
   };
 
+  const setFilterVisibility = (hidden: boolean) => {
+    if (hidden === filtersHidden) return;
+    setFiltersHidden(hidden);
+    Animated.timing(filterAnim, {
+      toValue: hidden ? 1 : 0,
+      duration: 180,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const onChatScroll = (event: any) => {
+    const y = event.nativeEvent.contentOffset.y;
+    const delta = y - lastOffsetY.current;
+    if (y < 0) return;
+    if (delta > 7) {
+      setFilterVisibility(true);
+    } else if (delta < -7) {
+      setFilterVisibility(false);
+    }
+    lastOffsetY.current = y;
+  };
+
+  const filterAnimatedStyle = {
+    transform: [
+      {
+        translateY: filterAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -20],
+        }),
+      },
+    ],
+    opacity: filterAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 0],
+    }),
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: activeTheme.background }]}>
       <View style={[styles.bgOrb, { top: -100, right: -50, backgroundColor: Theme.brand.primary, opacity: 0.15 }]} />
@@ -116,7 +157,7 @@ export default function ChatScreen() {
           accessibilityLabel="Back"
           accessibilityHint="Return to the previous screen"
         >
-          <Ionicons name="chevron-back" size={28} color={activeTheme.text} />
+          <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={[styles.headerSubtitle, { color: Theme.brand.primary }]}>NEURAL NETWORK</Text>
@@ -127,20 +168,20 @@ export default function ChatScreen() {
             style={[styles.iconCircle, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}
             onPress={() => setShowChatSettingsModal(true)}
           >
-            <Ionicons name="settings-outline" size={22} color={activeTheme.text} />
+            <Ionicons name="settings-outline" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.iconCircle, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}
             onPress={() => setShowGroupsModal(true)}
           >
-            <Ionicons name="people-outline" size={22} color={activeTheme.text} />
+            <Ionicons name="people-outline" size={16} color={activeTheme.text} />
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.searchWrap}>
         <BlurView intensity={25} tint={activeTheme === Theme.dark ? 'dark' : 'light'} style={[styles.searchBar, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}>
-          <Ionicons name="search-outline" size={18} color={activeTheme.textMuted} />
+          <Ionicons name="search-outline" size={16} color={activeTheme.textMuted} />
           <TextInput
             style={[styles.searchInput, { color: activeTheme.text }]}
             placeholder="Search conversations..."
@@ -149,31 +190,43 @@ export default function ChatScreen() {
             onChangeText={setSearchQuery}
           />
         </BlurView>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryWrap}>
-          {CHAT_CATEGORIES.map((category) => {
-            const isActive = activeCategory === category.key;
-            return (
-              <TouchableOpacity
-                key={category.key}
-                style={[
-                  styles.categoryChip,
-                  {
-                    backgroundColor: isActive ? Theme.brand.primary : activeTheme.card,
-                    borderColor: isActive ? Theme.brand.primary : activeTheme.border,
-                  },
-                ]}
-                onPress={() => setActiveCategory(category.key)}
-              >
-                <Text style={[styles.categoryChipText, { color: isActive ? '#FFF' : activeTheme.textMuted }]}>
-                  {category.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+        <Animated.View style={[styles.filterBarWrap, filterAnimatedStyle]}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryWrap}>
+            {CHAT_CATEGORIES.map((category) => {
+              const isActive = activeCategory === category.key;
+              return (
+                <TouchableOpacity
+                  key={category.key}
+                  style={[
+                    styles.categoryChip,
+                    {
+                      backgroundColor: isActive ? Theme.brand.primary : activeTheme.card,
+                      borderColor: isActive ? Theme.brand.primary : activeTheme.border,
+                    },
+                  ]}
+                  onPress={() => setActiveCategory(category.key)}
+                >
+                  <Ionicons
+                    name={category.icon as any}
+                    size={16}
+                    color={isActive ? '#FFF' : activeTheme.textMuted}
+                  />
+                  <Text style={[styles.categoryChipText, { color: isActive ? '#FFF' : activeTheme.textMuted }]}>
+                    {category.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </Animated.View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        onScroll={onChatScroll}
+        scrollEventThrottle={16}
+      >
         <Text style={[styles.sectionTitle, { color: activeTheme.text }]}>Online Nodes</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.storiesContainer}>
           {filteredNodes.map((initials, i) => (
@@ -209,7 +262,7 @@ export default function ChatScreen() {
         style={[styles.fab, { backgroundColor: Theme.brand.primary }]}
         onPress={() => setShowAddModal(true)}
       >
-        <Ionicons name="person-add" size={26} color="#FFF" />
+        <Ionicons name="person-add" size={16} color="#FFF" />
       </TouchableOpacity>
       <Modal visible={!!selectedUser} animationType="slide" presentationStyle="fullScreen">
         <DirectMessageView user={selectedUser} theme={activeTheme} onClose={() => setSelectedUser(null)} />
@@ -222,7 +275,7 @@ export default function ChatScreen() {
             <View style={styles.settingsModalHeader}>
               <Text style={[styles.settingsModalTitle, { color: activeTheme.text }]}>Chats</Text>
               <TouchableOpacity onPress={() => setShowChatSettingsModal(false)}>
-                <Ionicons name="close-outline" size={24} color={activeTheme.text} />
+                <Ionicons name="close-outline" size={16} color={activeTheme.text} />
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -294,7 +347,7 @@ export default function ChatScreen() {
             <View style={styles.settingsModalHeader}>
               <Text style={[styles.settingsModalTitle, { color: activeTheme.text }]}>Groups & Communities</Text>
               <TouchableOpacity onPress={() => setShowGroupsModal(false)}>
-                <Ionicons name="close-outline" size={24} color={activeTheme.text} />
+                <Ionicons name="close-outline" size={16} color={activeTheme.text} />
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -374,7 +427,7 @@ function DirectMessageView({
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.dmContainer, { backgroundColor: theme.background }]}>
       <BlurView intensity={40} tint={theme === Theme.dark ? 'dark' : 'light'} style={[styles.dmHeader, { borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={onClose} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={28} color={theme.text} />
+          <Ionicons name="chevron-back" size={16} color={theme.text} />
         </TouchableOpacity>
         <View style={styles.dmHeaderUser}>
           <View style={[styles.dmAvatar, { backgroundColor: user?.color || Theme.brand.primary }]}>
@@ -383,7 +436,7 @@ function DirectMessageView({
           <Text style={[styles.dmName, { color: theme.text }]}>{user?.name}</Text>
         </View>
         <TouchableOpacity style={styles.dmActionBtn}>
-          <Ionicons name="videocam-outline" size={22} color={Theme.brand.primary} />
+          <Ionicons name="videocam-outline" size={16} color={Theme.brand.primary} />
         </TouchableOpacity>
       </BlurView>
 
@@ -397,7 +450,7 @@ function DirectMessageView({
         {!isRecording ? (
           <View style={styles.inputInner}>
             <TouchableOpacity style={styles.inputAdd}>
-              <Ionicons name="add" size={24} color={Theme.brand.primary} />
+              <Ionicons name="add" size={16} color={Theme.brand.primary} />
             </TouchableOpacity>
             <TextInput
               style={[styles.dmInput, { color: theme.text }]}
@@ -408,11 +461,11 @@ function DirectMessageView({
             />
             {message.length > 0 ? (
               <TouchableOpacity style={[styles.sendBtn, { backgroundColor: Theme.brand.primary }]}>
-                <Ionicons name="arrow-up" size={20} color="#FFF" />
+                <Ionicons name="arrow-up" size={16} color="#FFF" />
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPressIn={startRecording} style={[styles.micBtn, { backgroundColor: theme.border }]}>
-                <Ionicons name="mic-outline" size={22} color={theme.text} />
+                <Ionicons name="mic-outline" size={16} color={theme.text} />
               </TouchableOpacity>
             )}
           </View>
@@ -424,7 +477,7 @@ function DirectMessageView({
             </View>
             <Text style={[styles.swipeCancel, { color: theme.textMuted }]}>Release to send</Text>
             <TouchableOpacity onPressOut={() => stopRecording(true)} style={styles.stopBtn}>
-              <Ionicons name="stop" size={20} color="#FFF" />
+              <Ionicons name="stop" size={16} color="#FFF" />
             </TouchableOpacity>
           </View>
         )}
@@ -448,7 +501,7 @@ function ChatBubble({ message, isMe, theme, status }: any) {
           {isMe && (
             <Ionicons
               name={status === 'read' ? 'checkmark-done' : 'checkmark'}
-              size={14}
+              size={16}
               color={status === 'read' ? '#FFF' : 'rgba(255,255,255,0.5)'}
               style={{ marginLeft: 4 }}
             />
@@ -465,7 +518,7 @@ function ChatOptionAction({ icon, label, value, onPress, theme }: any) {
       <View style={styles.chatOptionMain}>
         {icon ? (
           <View style={[styles.chatOptionIcon, { backgroundColor: theme.background }]}>
-            <Ionicons name={icon as any} size={18} color={theme.text} />
+            <Ionicons name={icon as any} size={16} color={theme.text} />
           </View>
         ) : null}
         <View style={styles.chatOptionTextWrap}>
@@ -473,7 +526,7 @@ function ChatOptionAction({ icon, label, value, onPress, theme }: any) {
           {value ? <Text style={[styles.chatOptionSub, { color: theme.textMuted }]}>{value}</Text> : null}
         </View>
       </View>
-      <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />
+      <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
     </TouchableOpacity>
   );
 }
@@ -501,10 +554,10 @@ function SettingsOption({ icon, label, theme }: any) {
   return (
     <TouchableOpacity style={styles.settingsOption}>
       <View style={[styles.optionIconBox, { backgroundColor: theme.background }]}>
-        <Ionicons name={icon as any} size={20} color={theme.text} />
+        <Ionicons name={icon as any} size={16} color={theme.text} />
       </View>
       <Text style={[styles.optionLabel, { color: theme.text }]}>{label}</Text>
-      <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />
+      <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
     </TouchableOpacity>
   );
 }
@@ -564,11 +617,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   categoryWrap: { paddingTop: 12, paddingBottom: 4, gap: 10 },
+  filterBarWrap: { gap: 10 },
   categoryChip: {
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 16,
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 9,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   categoryChipText: { fontSize: 12, fontWeight: '800', letterSpacing: 0.4, textTransform: 'uppercase' },
   headerSubtitle: { fontSize: 10, fontWeight: '900', letterSpacing: 2, marginBottom: 4 },

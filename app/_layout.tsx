@@ -6,7 +6,7 @@ import { ThemeProvider, useAppTheme } from '../lib/theme';
 import CustomDrawerContent from '../assets/components/CustomDrawerContent';
 
 function drawerIcon(name: keyof typeof Ionicons.glyphMap) {
-  return ({ color }: { color: string }) => <Ionicons name={name} size={22} color={color} />;
+  return ({ color }: { color: string }) => <Ionicons name={name} size={16} color={color} />;
 }
 
 function RootDrawer() {
@@ -135,6 +135,10 @@ function RootDrawer() {
         />
         <Drawer.Screen
           name="storage-data"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="app-lock"
           options={{ drawerItemStyle: { display: 'none' } }}
         />
 

@@ -22,7 +22,7 @@ export default function PrivacyCheckupScreen() {
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={[styles.header, { borderBottomColor: activeTheme.border }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={26} color={activeTheme.text} />
+            <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Privacy checkup</Text>
           <View style={styles.headerSpacer} />
@@ -33,13 +33,13 @@ export default function PrivacyCheckupScreen() {
             <View style={[styles.heroCard, { borderColor: activeTheme.border, backgroundColor: activeTheme.card }]}>
               <View style={styles.heroIcons}>
                 <View style={[styles.heroBadge, { backgroundColor: '#E5F9DF' }]}>
-                  <Ionicons name="shield-checkmark-outline" size={34} color={Theme.brand.primary} />
+                  <Ionicons name="shield-checkmark-outline" size={16} color={Theme.brand.primary} />
                 </View>
                 <View style={[styles.heroCenter, { backgroundColor: '#C7F3C1', borderColor: Theme.brand.primary }]}>
-                  <Ionicons name="lock-closed-outline" size={42} color={Theme.brand.primary} />
+                  <Ionicons name="lock-closed-outline" size={16} color={Theme.brand.primary} />
                 </View>
                 <View style={[styles.heroBadge, { backgroundColor: '#DBF7E2' }]}>
-                  <Ionicons name="options-outline" size={34} color={Theme.brand.primary} />
+                  <Ionicons name="options-outline" size={16} color={Theme.brand.primary} />
                 </View>
               </View>
               <Text style={[styles.heroTitle, { color: activeTheme.text }]}>Your privacy matters</Text>

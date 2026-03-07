@@ -66,7 +66,7 @@ export default function Onboarding() {
               colors={['rgba(255,255,255,0.15)', 'rgba(255,255,255,0.01)']}
               style={StyleSheet.absoluteFill}
             />
-            <Ionicons name={item.icon as any} size={54} color={item.color} />
+            <Ionicons name={item.icon as any} size={16} color={item.color} />
           </BlurView>
           <View style={[styles.iconGlow, { backgroundColor: item.color }]} />
         </Animated.View>
@@ -141,7 +141,7 @@ export default function Onboarding() {
             <Text style={styles.btnText}>
               {activeIndex === SLIDES.length - 1 ? "INITIALIZE" : "CONTINUE"}
             </Text>
-            <Ionicons name="chevron-forward" size={18} color="#FFF" />
+            <Ionicons name="chevron-forward" size={16} color="#FFF" />
           </LinearGradient>
         </TouchableOpacity>
         

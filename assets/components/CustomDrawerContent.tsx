@@ -13,6 +13,7 @@ export default function CustomDrawerContent(props: any) {
 
   const quickAccessLinks: Array<{ label: string; icon: keyof typeof Ionicons.glyphMap; path: string }> = [
     { label: 'Projects', icon: 'layers-outline', path: '/projects' },
+    { label: 'Bolts', icon: 'flash-outline', path: '/(tabs)/explore' },
     { label: 'Daily Reminders', icon: 'alarm-outline', path: '/reminders' },
     { label: 'Neural Pulse', icon: 'pulse-outline', path: '/pulse' },
     { label: 'Secure Vault', icon: 'shield-checkmark-outline', path: '/vault' },
@@ -45,7 +46,7 @@ export default function CustomDrawerContent(props: any) {
               style={[styles.menuItem, { borderColor: activeTheme.border, backgroundColor: activeTheme.card }]}
               onPress={() => goTo(item.path)}
             >
-              <Ionicons name={item.icon} size={18} color={activeTheme.textMuted} />
+              <Ionicons name={item.icon} size={16} color={activeTheme.textMuted} />
               <Text style={[styles.menuLabel, { color: activeTheme.text }]}>{item.label}</Text>
             </TouchableOpacity>
           ))}
@@ -62,7 +63,7 @@ export default function CustomDrawerContent(props: any) {
         ]}
         onPress={() => goTo('/auth/logout')}
       >
-        <Ionicons name="log-out-outline" size={20} color={Theme.brand.primary} />
+        <Ionicons name="log-out-outline" size={16} color={Theme.brand.primary} />
         <Text style={[styles.logoutText, { color: Theme.brand.primary }]}>Logout</Text>
       </TouchableOpacity>
     </View>

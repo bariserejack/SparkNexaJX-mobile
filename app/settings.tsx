@@ -60,7 +60,7 @@ export default function SettingsScreen() {
   const [selectedLanguage, setSelectedLanguage] = useState<AppLanguage>(APP_LANGUAGES[0]);
 
   const [toggles, setToggles] = useState({
-    push: true, faceId: true, aiRanking: true, autoSummary: false,
+    push: true, aiRanking: true, autoSummary: false,
     activeStatus: true, dataSharing: false, earlyAccess: true
   });
 
@@ -78,7 +78,7 @@ export default function SettingsScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={28} color={activeTheme.text} />
+            <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.headerLabel}>NEXANODE</Text>
@@ -93,10 +93,10 @@ export default function SettingsScreen() {
                 router.push('/contacts');
               }}
             >
-              <Ionicons name="person-add-outline" size={24} color={activeTheme.text} />
+              <Ionicons name="person-add-outline" size={16} color={activeTheme.text} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setIsAddModalVisible(true)}>
-              <Ionicons name="add-circle-outline" size={24} color={activeTheme.text} />
+              <Ionicons name="add-circle-outline" size={16} color={activeTheme.text} />
             </TouchableOpacity>
           </View>
         </View>
@@ -169,7 +169,7 @@ export default function SettingsScreen() {
           <SettingsSection label="Display & behavior" theme={activeTheme}>
             <View style={styles.row}>
               <View style={styles.rowLeft}>
-                <Ionicons name="color-palette-outline" size={20} color={activeTheme.textMuted} style={{marginRight: 12}} />
+                <Ionicons name="color-palette-outline" size={16} color={activeTheme.textMuted} style={{marginRight: 12}} />
                 <Text style={[styles.rowLabel, { color: activeTheme.text }]}>Theme</Text>
               </View>
               <View style={[styles.segmentedControl, { backgroundColor: activeTheme.background }]}>
@@ -193,13 +193,13 @@ export default function SettingsScreen() {
             <TouchableOpacity onPress={() => setIsLanguageModalVisible(true)}>
               <View style={styles.row}>
                 <View style={[styles.iconBox, { backgroundColor: activeTheme.background }]}>
-                  <Ionicons name="language-outline" size={18} color={activeTheme.text} />
+                  <Ionicons name="language-outline" size={16} color={activeTheme.text} />
                 </View>
                 <View style={styles.rowContent}>
                   <Text style={[styles.rowLabel, { color: activeTheme.text }]}>App language</Text>
                   <Text style={[styles.rowSub, { color: activeTheme.textMuted }]}>{selectedLanguage.label}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={18} color={activeTheme.textMuted} />
+                <Ionicons name="chevron-forward" size={16} color={activeTheme.textMuted} />
               </View>
             </TouchableOpacity>
             <View style={[styles.divider, { backgroundColor: activeTheme.border, marginLeft: 50 }]} />
@@ -238,9 +238,13 @@ export default function SettingsScreen() {
 
           {/* --- PRIVACY & SECURITY --- */}
           <SettingsSection label="Privacy & security" theme={activeTheme}>
-            <MenuRow icon="finger-print-outline" label="Biometric Unlock" 
-              right={<Switch value={toggles.faceId} onValueChange={() => updateToggle('faceId')} trackColor={{true: accentColor}} />}
-              theme={activeTheme} />
+            <MenuRow
+              icon="lock-closed-outline"
+              label="App lock"
+              sub="Biometric unlock and auto-lock timing"
+              onPress={() => router.push('/app-lock')}
+              theme={activeTheme}
+            />
             <MenuRow icon="shield-half-outline" label="Neural Encryption" sub="AES-256 Active" theme={activeTheme} />
             <MenuRow icon="people-circle-outline" label="How people find and contact you" onPress={() => router.push('/privacy')} theme={activeTheme} />
           </SettingsSection>
@@ -279,7 +283,7 @@ export default function SettingsScreen() {
             <View style={styles.languageModalHeader}>
               <Text style={[styles.languageModalTitle, { color: activeTheme.text }]}>App language</Text>
               <TouchableOpacity onPress={() => setIsLanguageModalVisible(false)}>
-                <Ionicons name="close-outline" size={24} color={activeTheme.text} />
+                <Ionicons name="close-outline" size={16} color={activeTheme.text} />
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false} style={styles.languageList}>
@@ -297,9 +301,9 @@ export default function SettingsScreen() {
                   >
                     <Text style={[styles.rowLabel, { color: activeTheme.text }]}>{language.label}</Text>
                     {isSelected ? (
-                      <Ionicons name="checkmark-circle" size={20} color={Theme.brand.primary} />
+                      <Ionicons name="checkmark-circle" size={16} color={Theme.brand.primary} />
                     ) : (
-                      <Ionicons name="ellipse-outline" size={20} color={activeTheme.textMuted} />
+                      <Ionicons name="ellipse-outline" size={16} color={activeTheme.textMuted} />
                     )}
                   </TouchableOpacity>
                 );
@@ -392,13 +396,13 @@ function MenuRow({ icon, label, sub, right, theme, onPress }: any) {
     <TouchableOpacity disabled={!onPress} onPress={onPress}>
       <View style={styles.row}>
         <View style={[styles.iconBox, { backgroundColor: theme.background }]}>
-          <Ionicons name={icon as any} size={18} color={theme.text} />
+          <Ionicons name={icon as any} size={16} color={theme.text} />
         </View>
         <View style={styles.rowContent}>
           <Text style={[styles.rowLabel, { color: theme.text }]}>{label}</Text>
           {sub && <Text style={[styles.rowSub, { color: theme.textMuted }]}>{sub}</Text>}
         </View>
-        {right ? right : <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />}
+        {right ? right : <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />}
       </View>
       <View style={[styles.divider, { backgroundColor: theme.border, marginLeft: 50 }]} />
     </TouchableOpacity>

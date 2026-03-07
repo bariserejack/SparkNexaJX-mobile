@@ -52,7 +52,7 @@ const Interactive = ({ children, onPress, style }: any) => {
 const SkillNode = ({ icon, label, progress, theme }: any) => (
   <View style={[styles.skillNode, { backgroundColor: theme.card, borderColor: theme.border }]}>
     <View style={[styles.nodeIconBg, { backgroundColor: Theme.brand.primary + '15' }]}>
-      <Ionicons name={icon} size={20} color={Theme.brand.primary} />
+      <Ionicons name={icon} size={16} color={Theme.brand.primary} />
     </View>
     <View style={styles.nodeInfo}>
       <Text style={[styles.nodeLabel, { color: theme.text }]}>{label}</Text>
@@ -73,7 +73,7 @@ const VideoBlueprintCard = ({ title, instructor, duration, color, index, theme, 
         style={styles.videoGradient}
       >
         <View style={[styles.playTag, { backgroundColor: color }]}>
-          <Ionicons name="play" size={10} color="#FFF" />
+          <Ionicons name="play" size={16} color="#FFF" />
           <Text style={styles.playTagText}>{duration}</Text>
         </View>
         <Text style={[styles.videoTitle, { color: theme.text }]} numberOfLines={2}>{title}</Text>
@@ -110,14 +110,14 @@ export default function LearnScreen() {
       <BlurView intensity={isDark ? 20 : 80} tint={activeTheme.tint as any} style={[styles.headerContainer, { borderBottomColor: activeTheme.border }]}>
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.topAction} onPress={openDrawer}>
-            <Ionicons name="reorder-three-outline" size={24} color={activeTheme.text} />
+            <Ionicons name="reorder-three-outline" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <View style={styles.topCenter}>
             <Text style={styles.topLabel}>LEARNING NODE</Text>
             <Text style={[styles.topTitle, { color: activeTheme.text }]}>Learn</Text>
           </View>
           <TouchableOpacity style={styles.topAction} onPress={() => router.push('/settings')}>
-            <Ionicons name="settings-outline" size={21} color={activeTheme.text} />
+            <Ionicons name="settings-outline" size={16} color={activeTheme.text} />
           </TouchableOpacity>
         </View>
         <View style={styles.headerContent}>
@@ -152,7 +152,7 @@ export default function LearnScreen() {
             >
               <View style={styles.slideInfo}>
                 <View style={styles.premiumBadge}>
-                  <Ionicons name="star" size={10} color="#FFF" />
+                  <Ionicons name="star" size={16} color="#FFF" />
                   <Text style={styles.premiumText}>PREMIUM MODULE</Text>
                 </View>
                 <Text style={styles.slideTitle}>Deep Focus Protocols</Text>
@@ -163,7 +163,7 @@ export default function LearnScreen() {
                   <Ionicons name="arrow-forward" size={16} color={isDark ? Theme.brand.primary : Theme.brand.primary} />
                 </TouchableOpacity>
               </View>
-              <Ionicons name="pulse" size={100} color="rgba(255,255,255,0.1)" style={styles.bgIcon} />
+              <Ionicons name="pulse" size={16} color="rgba(255,255,255,0.1)" style={styles.bgIcon} />
             </LinearGradient>
           </Interactive>
         </View>

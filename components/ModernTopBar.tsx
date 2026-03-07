@@ -44,7 +44,7 @@ export function ModernTopBar({ currentRoute }: { currentRoute: string }) {
           onPress={() => router.push('/notifications')}
           style={[styles.actionButton, { borderColor: activeTheme.border, backgroundColor: activeTheme.cardElevated }]}
         >
-          <Ionicons name="notifications-outline" size={18} color={activeTheme.text} />
+          <Ionicons name="notifications-outline" size={16} color={activeTheme.text} />
         </TouchableOpacity>
       </View>
 

@@ -40,7 +40,7 @@ export default function ProfileSettingsScreen() {
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={[styles.header, { borderBottomColor: activeTheme.border }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={26} color={activeTheme.text} />
+            <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Profile Settings</Text>
           <TouchableOpacity style={[styles.avatarDot, { borderColor: activeTheme.border, backgroundColor: activeTheme.card }]}>

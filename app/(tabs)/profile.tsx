@@ -113,14 +113,14 @@ export default function ProfileScreen() {
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <View style={styles.topBar}>
           <TouchableOpacity onPress={openDrawer} style={styles.topAction}>
-            <Ionicons name="reorder-three-outline" size={24} color={activeTheme.text} />
+            <Ionicons name="reorder-three-outline" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <View style={styles.topCenter}>
             <Text style={styles.topLabel}>IDENTITY NODE</Text>
             <Text style={[styles.topTitle, { color: activeTheme.text }]}>Profile</Text>
           </View>
           <TouchableOpacity style={styles.topAction} onPress={() => router.push('/settings')}>
-            <Ionicons name="settings-outline" size={21} color={activeTheme.text} />
+            <Ionicons name="settings-outline" size={16} color={activeTheme.text} />
           </TouchableOpacity>
         </View>
 
@@ -156,7 +156,7 @@ export default function ProfileScreen() {
               <View style={styles.profileAvatarWrap}>
                 <AppLogo size={82} bordered />
                 <TouchableOpacity style={[styles.profileAvatarEdit, { borderColor: activeTheme.border, backgroundColor: activeTheme.card }]} onPress={() => router.push('/edit-profile')}>
-                  <Ionicons name="create-outline" size={14} color={activeTheme.text} />
+                  <Ionicons name="create-outline" size={16} color={activeTheme.text} />
                   <View style={styles.coverIconAccent} />
                 </TouchableOpacity>
               </View>
@@ -170,18 +170,18 @@ export default function ProfileScreen() {
             <View style={styles.actionRow}>
               <TouchableOpacity style={styles.primaryAction}>
                 <LinearGradient colors={Theme.brand.primaryGradient} style={styles.primaryGradient}>
-                  <Ionicons name="radio-outline" size={18} color="#FFFFFF" />
+                  <Ionicons name="radio-outline" size={16} color="#FFFFFF" />
                   <Text style={styles.primaryActionText}>TUNE IN</Text>
                 </LinearGradient>
               </TouchableOpacity>
 
               <TouchableOpacity style={[styles.secondaryAction, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}>
-                <Ionicons name="flash-outline" size={18} color={activeTheme.text} />
+                <Ionicons name="flash-outline" size={16} color={activeTheme.text} />
                 <Text style={[styles.secondaryActionText, { color: activeTheme.text }]}>PULSE</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={[styles.tertiaryAction, { borderColor: Theme.brand.primary }]}>
-                <Ionicons name="briefcase-outline" size={18} color={Theme.brand.primary} />
+                <Ionicons name="briefcase-outline" size={16} color={Theme.brand.primary} />
               </TouchableOpacity>
             </View>
           </BlurView>
@@ -190,7 +190,7 @@ export default function ProfileScreen() {
             <Text style={[styles.presenceLabel, { color: activeTheme.textMuted }]}>CURRENT FOCUS</Text>
             <Text style={[styles.presenceText, { color: activeTheme.text }]}>Building SparkNexa Identity Experience</Text>
             <View style={styles.availabilityRow}>
-              <Ionicons name="time-outline" size={14} color={Theme.brand.primary} />
+              <Ionicons name="time-outline" size={16} color={Theme.brand.primary} />
               <Text style={styles.availabilityText}>{availability}</Text>
             </View>
           </View>
@@ -222,21 +222,21 @@ export default function ProfileScreen() {
           <View style={[styles.infoCard, { backgroundColor: activeTheme.cardElevated, borderColor: activeTheme.border }]}>
             <Text style={[styles.sectionTitle, { color: activeTheme.text }]}>Identity Details</Text>
             <View style={styles.infoRow}>
-              <Ionicons name="location-outline" size={18} color={activeTheme.textMuted} />
+              <Ionicons name="location-outline" size={16} color={activeTheme.textMuted} />
               <Text style={[styles.infoText, { color: activeTheme.text }]}>Uyo, Akwa Ibom, Nigeria</Text>
             </View>
             <View style={styles.infoRow}>
-              <Ionicons name="school-outline" size={18} color={activeTheme.textMuted} />
+              <Ionicons name="school-outline" size={16} color={activeTheme.textMuted} />
               <Text style={[styles.infoText, { color: activeTheme.text }]}>Computer Engineering</Text>
             </View>
             <View style={styles.infoRow}>
-              <Ionicons name="sparkles-outline" size={18} color={activeTheme.textMuted} />
+              <Ionicons name="sparkles-outline" size={16} color={activeTheme.textMuted} />
               <Text style={[styles.infoText, { color: activeTheme.text }]}>Open for Collab Sessions</Text>
             </View>
           </View>
 
           <TouchableOpacity style={styles.logoutButton} onPress={() => router.push('/auth/logout')}>
-            <Ionicons name="log-out-outline" size={18} color="#FF3B30" />
+            <Ionicons name="log-out-outline" size={16} color="#FF3B30" />
             <Text style={styles.logoutText}>LOG OUT</Text>
           </TouchableOpacity>
         </ScrollView>

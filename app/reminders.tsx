@@ -464,7 +464,7 @@ export default function RemindersScreen() {
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <View style={styles.topBar}>
           <TouchableOpacity onPress={openDrawer} style={styles.topAction}>
-            <Ionicons name="reorder-three-outline" size={24} color={activeTheme.text} />
+            <Ionicons name="reorder-three-outline" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <View style={styles.topCenter}>
             <Text style={styles.topLabel}>DAILY PULSE</Text>
@@ -543,7 +543,7 @@ export default function RemindersScreen() {
               onPress={onCreateReminder}
               disabled={submitting}
             >
-              {submitting ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Ionicons name="alarm-outline" size={18} color="#FFFFFF" />}
+              {submitting ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Ionicons name="alarm-outline" size={16} color="#FFFFFF" />}
               <Text style={styles.createButtonText}>Set Reminder</Text>
             </TouchableOpacity>
           </View>
@@ -586,7 +586,7 @@ export default function RemindersScreen() {
                       >
                         <Ionicons
                           name={reminder.status === 'done' ? 'refresh-outline' : 'checkmark-outline'}
-                          size={15}
+                          size={16}
                           color={Theme.brand.primary}
                         />
                       </TouchableOpacity>
@@ -600,7 +600,7 @@ export default function RemindersScreen() {
                         ]}
                         onPress={() => onDeleteReminder(reminder)}
                       >
-                        <Ionicons name="trash-outline" size={15} color="#FF3B30" />
+                        <Ionicons name="trash-outline" size={16} color="#FF3B30" />
                       </TouchableOpacity>
                     </View>
                   )}

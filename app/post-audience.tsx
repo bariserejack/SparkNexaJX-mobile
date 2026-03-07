@@ -37,7 +37,7 @@ export default function PostAudienceScreen() {
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={[styles.header, { borderBottomColor: activeTheme.border }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={24} color={activeTheme.text} />
+            <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Who can see your post?</Text>
           <View style={styles.headerSpacer} />
@@ -92,7 +92,7 @@ export default function PostAudienceScreen() {
           <TouchableOpacity style={styles.defaultRow} onPress={() => setSetDefault((prev) => !prev)}>
             <Text style={[styles.defaultText, { color: activeTheme.textMuted }]}>Set as default audience.</Text>
             <View style={[styles.checkbox, { backgroundColor: setDefault ? Theme.brand.primary : activeTheme.border }]}>
-              {setDefault ? <Ionicons name="checkmark" size={14} color="#FFFFFF" /> : null}
+              {setDefault ? <Ionicons name="checkmark" size={16} color="#FFFFFF" /> : null}
             </View>
           </TouchableOpacity>
 

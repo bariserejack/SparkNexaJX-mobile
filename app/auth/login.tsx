@@ -100,7 +100,7 @@ export default function LoginScreen() {
           <View style={styles.card}>
             <Text style={styles.label}>Email</Text>
             <View style={styles.inputWrap}>
-              <Ionicons name="mail-outline" size={18} color={palette.textMuted} />
+              <Ionicons name="mail-outline" size={16} color={palette.textMuted} />
               <TextInput
                 style={styles.input}
                 placeholder="you@example.com"
@@ -114,7 +114,7 @@ export default function LoginScreen() {
 
             <Text style={styles.label}>Password</Text>
             <View style={styles.inputWrap}>
-              <Ionicons name="lock-closed-outline" size={18} color={palette.textMuted} />
+              <Ionicons name="lock-closed-outline" size={16} color={palette.textMuted} />
               <TextInput
                 style={styles.input}
                 placeholder="********"
@@ -124,7 +124,7 @@ export default function LoginScreen() {
                 secureTextEntry={!showPassword}
               />
               <TouchableOpacity onPress={() => setShowPassword((prev) => !prev)}>
-                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={palette.textMuted} />
+                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={16} color={palette.textMuted} />
               </TouchableOpacity>
             </View>
 
@@ -134,7 +134,7 @@ export default function LoginScreen() {
               ) : (
                 <>
                   <Text style={styles.ctaText}>Login</Text>
-                  <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+                  <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
                 </>
               )}
             </TouchableOpacity>
@@ -151,7 +151,7 @@ export default function LoginScreen() {
                   onPress={() => handleOAuthLogin(p.key)}
                   disabled={loading}
                 >
-                  <Ionicons name={p.icon as any} size={20} color={p.color} />
+                  <Ionicons name={p.icon as any} size={16} color={p.color} />
                   <Text style={styles.socialTxt}>Continue with {p.label}</Text>
                 </TouchableOpacity>
               ))}

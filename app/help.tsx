@@ -29,7 +29,7 @@ export default function HelpScreen() {
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={[styles.header, { borderBottomColor: activeTheme.border }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={26} color={activeTheme.text} />
+            <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Help</Text>
           <View style={styles.headerSpacer} />
@@ -48,7 +48,7 @@ export default function HelpScreen() {
                     <Text style={[styles.itemLabel, { color: activeTheme.text }]}>{item.label}</Text>
                     {item.sub ? <Text style={[styles.itemSub, { color: activeTheme.textMuted }]}>{item.sub}</Text> : null}
                   </View>
-                  <Ionicons name="chevron-forward" size={18} color={activeTheme.textMuted} />
+                  <Ionicons name="chevron-forward" size={16} color={activeTheme.textMuted} />
                 </TouchableOpacity>
                 {index !== HELP_ITEMS.length - 1 ? <View style={[styles.divider, { backgroundColor: activeTheme.border }]} /> : null}
               </View>

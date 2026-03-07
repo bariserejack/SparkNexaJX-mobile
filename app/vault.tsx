@@ -85,7 +85,7 @@ export default function VaultScreen() {
 
   const renderRightActions = (id: string) => (
     <TouchableOpacity style={styles.deleteAction} onPress={() => deleteFile(id)} activeOpacity={0.8}>
-      <Ionicons name="trash-sharp" size={22} color="#FFF" />
+      <Ionicons name="trash-sharp" size={16} color="#FFF" />
     </TouchableOpacity>
   );
 
@@ -101,7 +101,7 @@ export default function VaultScreen() {
             <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Vault</Text>
           </View>
           <TouchableOpacity style={[styles.infoCircle, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}>
-            <Ionicons name="shield-checkmark" size={20} color={Theme.brand.primary} />
+            <Ionicons name="shield-checkmark" size={16} color={Theme.brand.primary} />
           </TouchableOpacity>
         </View>
 
@@ -141,7 +141,7 @@ export default function VaultScreen() {
           </ScrollView>
 
           <View style={[styles.searchBar, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}> 
-            <Ionicons name="search-outline" size={20} color={activeTheme.textMuted} style={{ marginRight: 10 }} />
+            <Ionicons name="search-outline" size={16} color={activeTheme.textMuted} style={{ marginRight: 10 }} />
             <TextInput
               placeholder="Filter by name..."
               placeholderTextColor={activeTheme.textMuted}
@@ -174,7 +174,7 @@ export default function VaultScreen() {
                     <View style={[styles.fileIconBox, { backgroundColor: file.type === "pdf" ? "rgba(255, 59, 48, 0.1)" : "rgba(115, 103, 240, 0.1)" }]}>
                       <Ionicons
                         name={file.type === "pdf" ? "document-text" : file.type === "zip" ? "archive" : "file-tray-full"}
-                        size={22}
+                        size={16}
                         color={file.type === "pdf" ? "#FF3B30" : Theme.brand.primary}
                       />
                     </View>
@@ -193,7 +193,7 @@ export default function VaultScreen() {
 
         <TouchableOpacity style={styles.fab} onPress={handleUpload} activeOpacity={0.8}>
           <LinearGradient colors={[Theme.brand.primary, "#ce9ffc"]} style={styles.fabGradient}>
-            <Ionicons name="cloud-upload" size={26} color="#FFF" />
+            <Ionicons name="cloud-upload" size={16} color="#FFF" />
           </LinearGradient>
         </TouchableOpacity>
       </View>

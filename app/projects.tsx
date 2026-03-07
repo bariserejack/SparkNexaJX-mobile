@@ -133,7 +133,7 @@ function ProjectTaskTile({
         activeOpacity={0.78}
       >
         <View style={[styles.iconBox, { backgroundColor: `${meta.color}18` }]}>
-          <Ionicons name={meta.icon} size={22} color={meta.color} />
+          <Ionicons name={meta.icon} size={16} color={meta.color} />
         </View>
         <View style={styles.tileContent}>
           <Text style={[styles.tileLabel, { color: theme.text }]}>{project.title}</Text>
@@ -327,7 +327,7 @@ export default function ProjectScreen() {
               style={styles.projectGlow}
             >
               <View style={[styles.headerInner, { backgroundColor: activeTheme.background }]}>
-                <Ionicons name="rocket-sharp" size={36} color={activeTheme.text} />
+                <Ionicons name="rocket-sharp" size={16} color={activeTheme.text} />
               </View>
             </LinearGradient>
           </Animated.View>
@@ -385,7 +385,7 @@ export default function ProjectScreen() {
             </View>
           ) : projects.length === 0 ? (
             <View style={[styles.emptyState, { borderColor: activeTheme.border, backgroundColor: activeTheme.card }]}>
-              <Ionicons name="file-tray-outline" size={20} color={activeTheme.textMuted} />
+              <Ionicons name="file-tray-outline" size={16} color={activeTheme.textMuted} />
               <Text style={[styles.emptyText, { color: activeTheme.textMuted }]}>
                 No projects yet. Tap initialize to create one.
               </Text>
@@ -417,7 +417,7 @@ export default function ProjectScreen() {
             {creating ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <Ionicons name="add" size={20} color="#FFFFFF" />
+              <Ionicons name="add" size={16} color="#FFFFFF" />
             )}
             <Text style={styles.actionBtnText}>INITIALIZE NEW BUILD</Text>
           </LinearGradient>

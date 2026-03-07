@@ -42,7 +42,7 @@ export default function NotificationsScreen() {
         {item.unread && <View style={[styles.unreadBar, { backgroundColor: item.color }]} />}
         
         <View style={[styles.iconBg, { backgroundColor: item.color + '15' }]}>
-          <Ionicons name={item.icon as any} size={20} color={item.color} />
+          <Ionicons name={item.icon as any} size={16} color={item.color} />
         </View>
         
           <View style={styles.textContainer}>
@@ -95,7 +95,7 @@ export default function NotificationsScreen() {
           }
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Ionicons name="sparkles-outline" size={48} color={activeTheme.textMuted} />
+              <Ionicons name="sparkles-outline" size={16} color={activeTheme.textMuted} />
               <Text style={[styles.emptyText, { color: activeTheme.text }]}>You're all caught up</Text>
             </View>
           }
@@ -107,7 +107,7 @@ export default function NotificationsScreen() {
           onPress={() => router.back()}
         >
           <BlurView intensity={50} tint={isDark ? 'dark' : 'light'} style={[styles.backBlur, { borderColor: activeTheme.border }]}>
-            <Ionicons name="chevron-back" size={24} color={activeTheme.text} />
+            <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </BlurView>
         </TouchableOpacity>
 

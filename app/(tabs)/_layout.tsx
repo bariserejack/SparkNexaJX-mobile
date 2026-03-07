@@ -15,7 +15,7 @@ function makeTabOptions(
     tabBarLabel: label,
     tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
       <View style={[styles.iconWrap, focused && { backgroundColor: activeBg }]}>
-        <Ionicons name={focused ? activeIcon : inactiveIcon} size={22} color={color} />
+        <Ionicons name={focused ? activeIcon : inactiveIcon} size={16} color={color} />
       </View>
     ),
   };
