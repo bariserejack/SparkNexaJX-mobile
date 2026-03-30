@@ -1,4 +1,4 @@
-// signup.tsx performs a multi-step account creation flow.
+﻿// signup.tsx performs a multi-step account creation flow.
 // It optionally captures a phone number and, if provided, goes into an
 // OTP verification step afterward. Sending and verifying the code requires
 // a backend or third-party service (e.g. Twilio) configured via environment
@@ -38,6 +38,13 @@ type Step = 1 | 2 | 3 | 4; // added step 4 for phone OTP verification
 
 export default function SignUpScreen() {
   const [step, setStep] = useState<Step>(1);
+  const handleBack = () => {
+    if (step > 1) {
+      setStep((prev) => (prev > 1 ? ((prev - 1) as Step) : prev));
+      return;
+    }
+    router.back();
+  };
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -177,7 +184,7 @@ export default function SignUpScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <View style={styles.topRow}>
-              <TouchableOpacity style={styles.backBtn} onPress={() => (step > 1 ? setStep((step - 1) as Step) : router.back())}>
+              <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
                 <Ionicons name="chevron-back" size={16} color={palette.text} />
               </TouchableOpacity>
               <Text style={styles.stepLabel}>
@@ -194,12 +201,12 @@ export default function SignUpScreen() {
             </View>
           </View>
 
-          <View style={styles.card}>
-            <View style={styles.logoRow}>
-              <AppLogo size={64} />
-            </View>
+            <View style={styles.card}>
+              <View style={styles.logoRow}>
+                <AppLogo size={64} />
+                <Text style={styles.appName}>SparkNexaJX</Text>
+              </View>
             <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Start here when opening the app for the first time.</Text>
             {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
 
             {step === 1 && (
@@ -428,19 +435,21 @@ const styles = StyleSheet.create({
   },
   logoRow: {
     marginBottom: 6,
-    alignItems: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  appName: {
+    color: palette.text,
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: -0.3,
   },
   title: {
     color: palette.text,
     fontSize: 30,
     fontWeight: '800',
     letterSpacing: -0.4,
-  },
-  subtitle: {
-    marginTop: 6,
-    color: palette.textMuted,
-    fontSize: 14,
-    marginBottom: 8,
   },
   label: {
     fontSize: 12,

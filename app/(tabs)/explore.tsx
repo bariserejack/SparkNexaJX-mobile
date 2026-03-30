@@ -39,6 +39,39 @@ const NEWS_CATEGORIES: Array<{
     { key: 'cloud', label: 'Cloud', icon: 'cloud-outline', accent: '#38bdf8' },
 ];
 
+const TUNE_ORBIT = [
+    {
+        id: 'tune-1',
+        name: 'Gift Patrick',
+        handle: '@gift_p',
+        focus: 'Computer Engineering',
+        location: 'Uyo, Nigeria',
+        level: 'Level 3',
+        status: 'Active now',
+        mutual: '3 mutual tune-ins',
+    },
+    {
+        id: 'tune-2',
+        name: 'Esther Nick',
+        handle: '@esther.nick',
+        focus: 'Graphic Design',
+        location: 'Calabar, Nigeria',
+        level: 'Level 2',
+        status: 'Active now',
+        mutual: '1 mutual tune-in',
+    },
+    {
+        id: 'tune-3',
+        name: 'Ade Llah',
+        handle: '@ade.llah',
+        focus: 'Math Study Group',
+        location: 'Lagos, Nigeria',
+        level: 'Level 4',
+        status: 'Active now',
+        mutual: '2 mutual tune-ins',
+    },
+];
+
 export default function ExploreScreen() {
     const { activeTheme, isDark } = useAppTheme();
     const navigation = useNavigation();
@@ -116,6 +149,63 @@ export default function ExploreScreen() {
                             onChangeText={setSearchQuery}
                         />
                     </BlurView>
+                </View>
+
+                {/* Tune Orbit Slider */}
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={[styles.sectionTitle, { color: activeTheme.text }]}>Tune Orbit</Text>
+                        <TouchableOpacity onPress={() => router.push({ pathname: '/tune-requests', params: { tab: 'active' } })}>
+                            <Text style={styles.viewAll}>See more</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tuneScroll}>
+                        {TUNE_ORBIT.map((item) => (
+                            <TouchableOpacity
+                                key={item.id}
+                                style={[styles.tuneCard, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}
+                                activeOpacity={0.9}
+                                onPress={() =>
+                                    router.push({
+                                        pathname: '/tune-request-detail',
+                                        params: {
+                                            name: item.name,
+                                            handle: item.handle,
+                                            focus: item.focus,
+                                            location: item.location,
+                                            level: item.level,
+                                            status: item.status,
+                                            mutual: item.mutual,
+                                        },
+                                    })
+                                }
+                            >
+                                <LinearGradient
+                                    colors={['rgba(115,103,240,0.12)', 'rgba(0,0,0,0)']}
+                                    style={StyleSheet.absoluteFillObject}
+                                />
+                                <View style={styles.tuneHeaderRow}>
+                                    <View style={[styles.tuneAvatar, { backgroundColor: Theme.brand.primary + '22' }]}>
+                                        <Text style={styles.tuneAvatarText}>{item.name.slice(0, 1)}</Text>
+                                    </View>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={[styles.tuneName, { color: activeTheme.text }]}>{item.name}</Text>
+                                        <Text style={[styles.tuneHandle, { color: activeTheme.textMuted }]}>
+                                            {item.handle} · {item.focus}
+                                        </Text>
+                                    </View>
+                                </View>
+                                <View style={styles.tuneMetaRow}>
+                                    <Ionicons name="location-outline" size={14} color={activeTheme.textMuted} />
+                                    <Text style={[styles.tuneMetaText, { color: activeTheme.textMuted }]}>{item.location}</Text>
+                                </View>
+                                <View style={styles.tuneMetaRow}>
+                                    <Ionicons name="people-outline" size={14} color={activeTheme.textMuted} />
+                                    <Text style={[styles.tuneMetaText, { color: activeTheme.textMuted }]}>{item.mutual}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
                 </View>
 
                 {/* 2. Trending Bolts */}
@@ -313,6 +403,27 @@ const styles = StyleSheet.create({
     boltGradient: { flex: 1, justifyContent: 'flex-end', padding: 15 },
     boltViews: { color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '800' },
     boltUser: { color: '#FFF', fontSize: 14, fontWeight: '800' },
+    tuneScroll: { paddingLeft: 25, gap: 16, paddingBottom: 4 },
+    tuneCard: {
+        width: 270,
+        borderRadius: 26,
+        borderWidth: 1,
+        padding: 16,
+        overflow: 'hidden',
+    },
+    tuneHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10 },
+    tuneAvatar: {
+        width: 46,
+        height: 46,
+        borderRadius: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    tuneAvatarText: { color: Theme.brand.primary, fontSize: 18, fontWeight: '800' },
+    tuneName: { fontSize: 16, fontWeight: '800' },
+    tuneHandle: { fontSize: 12, fontWeight: '600', marginTop: 2 },
+    tuneMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
+    tuneMetaText: { fontSize: 12, fontWeight: '600' },
     glassNewsCard: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 25, borderRadius: 28, padding: 20, borderWidth: 1, overflow: 'hidden' },
     newsInfo: { flex: 1 },
     newsTitle: { fontSize: 18, fontWeight: '900', marginBottom: 6 },

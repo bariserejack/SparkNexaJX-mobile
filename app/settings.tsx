@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { 
   View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, 
-  Platform, TextInput,
+  Platform, TextInput, Image,
   Modal, Dimensions
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
+import { router } from 'expo-router';
 import { Theme } from '../constants/Theme';
 import { useAppTheme } from '../lib/theme';
+import { useDrawerBack } from '../lib/useDrawerBack';
 
 const { width } = Dimensions.get('window');
 
@@ -50,6 +51,7 @@ const APP_LANGUAGES: AppLanguage[] = [
 
 export default function SettingsScreen() {
   const { themeMode, setThemeMode, activeTheme, isDark } = useAppTheme();
+  const handleBack = useDrawerBack();
 
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
@@ -58,10 +60,15 @@ export default function SettingsScreen() {
   const [email, setEmail] = useState("alex.spark@nexa.io");
   const [accentColor, setAccentColor] = useState(Theme.brand?.primary || '#7367f0');
   const [selectedLanguage, setSelectedLanguage] = useState<AppLanguage>(APP_LANGUAGES[0]);
+  const profilePhoto = require('../assets/images/brand.logo.png');
 
   const [toggles, setToggles] = useState({
-    push: true, aiRanking: true, autoSummary: false,
-    activeStatus: true, dataSharing: false, earlyAccess: true
+    earlyAccess: true,
+    activeStatus: true,
+    showCurrentActivity: true,
+    zenStudy: false,
+    studyDataPrivacy: true,
+    hideOnlineWhileStudying: false,
   });
 
   const updateToggle = (key: keyof typeof toggles) => {
@@ -77,11 +84,11 @@ export default function SettingsScreen() {
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity onPress={handleBack}>
             <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <Text style={styles.headerLabel}>NEXANODE</Text>
+            <Text style={styles.headerLabel}>SPARKNEXAJX</Text>
             <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Settings & privacy</Text>
           </View>
           {/* right side icons: contacts and add (group/community) */}
@@ -89,8 +96,7 @@ export default function SettingsScreen() {
             <TouchableOpacity
               style={{ marginRight: 20 }}
               onPress={() => {
-                // navigate to contacts screen (placeholder)
-                router.push('/contacts');
+                router.push({ pathname: '/new-contact', params: { returnTo: '/settings' } });
               }}
             >
               <Ionicons name="person-add-outline" size={16} color={activeTheme.text} />
@@ -112,9 +118,20 @@ export default function SettingsScreen() {
             >
               <View style={styles.profileRow}>
                 <View style={styles.avatarContainer}>
-                  <View style={styles.avatarBlur}>
-                     <Text style={styles.avatarText}>{fullName.charAt(0)}</Text>
-                  </View>
+                  <LinearGradient
+                    colors={['rgba(255,255,255,0.6)', 'rgba(255,255,255,0.15)']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.avatarRing}
+                  >
+                    {profilePhoto ? (
+                      <Image source={profilePhoto} style={styles.avatarImage} />
+                    ) : (
+                      <View style={styles.avatarFallback}>
+                        <Text style={styles.avatarText}>{fullName.charAt(0)}</Text>
+                      </View>
+                    )}
+                  </LinearGradient>
                 </View>
                 <View style={styles.profileInfo}>
                   <Text style={styles.profileName}>{fullName}</Text>
@@ -126,12 +143,12 @@ export default function SettingsScreen() {
 
           {/* --- ACCOUNT CENTER --- */}
           <SettingsSection label="Identity Node" theme={activeTheme}>
-            <MenuRow icon="person-circle-outline" label="Account" onPress={() => router.push('/account')} theme={activeTheme} />
-            <MenuRow icon="sparkles-outline" label="Profile settings" onPress={() => router.push('/profile-settings')} theme={activeTheme} />
-            <MenuRow icon="person-outline" label="Personal details" theme={activeTheme} />
-            <MenuRow icon="shield-checkmark-outline" label="Password and security" theme={activeTheme} />
-            <MenuRow icon="notifications-outline" label="Ad preferences" theme={activeTheme} />
-            <MenuRow icon="star-outline" label="Verification" theme={activeTheme} />
+            <MenuRow icon="person-circle-outline" label="Account" onPress={() => router.push({ pathname: '/account', params: { from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="create-outline" label="Profile settings" onPress={() => router.push({ pathname: '/profile-settings', params: { from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="person-outline" label="Personal details" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'personal-details', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="key-outline" label="Password and security" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'password-security', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="pricetag-outline" label="Ad preferences" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'ad-preferences', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="star-outline" label="Verification" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'verification', from: 'settings' } })} theme={activeTheme} />
             <View style={[styles.moreLink]}>
               <Text style={[styles.moreLinkText, { color: Theme.brand.primary }]}>See more in Identity Center</Text>
             </View>
@@ -139,30 +156,73 @@ export default function SettingsScreen() {
 
           {/* --- CHATS SETTINGS --- */}
           <SettingsSection label="Chats & Privacy" theme={activeTheme}>
-            <Text style={[styles.descText, { color: activeTheme.textMuted }]}>Manage your messaging preferences and privacy.</Text>
-            <MenuRow icon="archive-outline" label="Archived chats" theme={activeTheme} />
-            <MenuRow icon="chatbubble-ellipses-outline" label="Message requests" theme={activeTheme} />
-            <MenuRow icon="shield-checkmark-outline" label="Privacy" onPress={() => router.push('/privacy')} theme={activeTheme} />
-            <MenuRow icon="chatbubbles-outline" label="Bubbles" theme={activeTheme} />
-            <MenuRow icon="image-outline" label="Manage Media Storage" theme={activeTheme} />
+            <MenuRow icon="archive-outline" label="Archived chats" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'archived-chats', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="chatbubble-ellipses-outline" label="Message requests" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'message-requests', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="shield-checkmark-outline" label="Privacy" onPress={() => router.push({ pathname: '/privacy', params: { from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="chatbubbles-outline" label="Bubbles" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'chat-bubbles', from: 'settings' } })} theme={activeTheme} />
+          </SettingsSection>
+
+          {/* --- MANAGE MEDIA STORAGE --- */}
+          <SettingsSection label="Manage media storage" theme={activeTheme}>
+            <MenuRow
+              icon="images-outline"
+              label="Manage Media Storage"
+              onPress={() => router.push({ pathname: '/storage-data', params: { from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="pie-chart-outline"
+              label="Storage usage breakdown"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'storage-usage-breakdown', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="cloud-download-outline"
+              label="Auto-download preferences"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'auto-download-preferences', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="aperture-outline"
+              label="Quality settings"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'quality-settings', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="trash-bin-outline"
+              label="Free up space"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'free-up-space', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="hardware-chip-outline"
+              label="Smart storage manager"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'smart-storage-manager', from: 'settings' } })}
+              theme={activeTheme}
+            />
           </SettingsSection>
 
           {/* --- TOOLS AND RESOURCES --- */}
           <SettingsSection label="Tools and resources" theme={activeTheme}>
-            <Text style={[styles.descText, { color: activeTheme.textMuted }]}>Manage your privacy and security.</Text>
-            <MenuRow icon="lock-closed-outline" label="Privacy Checkup" onPress={() => router.push('/privacy-checkup')} theme={activeTheme} />
-            <MenuRow icon="help-circle-outline" label="Help" onPress={() => router.push('/help')} theme={activeTheme} />
-            <MenuRow icon="people-outline" label="Family Center" theme={activeTheme} />
-            <MenuRow icon="eye-outline" label="Default audience settings" onPress={() => router.push('/post-audience')} theme={activeTheme} />
+            <MenuRow icon="options-outline" label="Privacy Checkup" onPress={() => router.push({ pathname: '/privacy-checkup', params: { from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="help-circle-outline" label="Help" onPress={() => router.push({ pathname: '/help', params: { from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="chatbox-ellipses-outline" label="Contact support" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'contact-support', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="bug-outline" label="Report a problem" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'report-problem', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="home-outline" label="Family Center" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'family-center', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="heart-circle-outline" label="Guardian Connect" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'guardian-connect', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="eye-outline" label="Default audience settings" onPress={() => router.push({ pathname: '/post-audience', params: { from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="alert-circle-outline" label="Safety tools" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'safety-tools', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="book-outline" label="Learning resources hub" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'learning-resources-hub', from: 'settings' } })} theme={activeTheme} />
           </SettingsSection>
 
           {/* --- PREFERENCES --- */}
           <SettingsSection label="Preferences" theme={activeTheme}>
-            <Text style={[styles.descText, { color: activeTheme.textMuted }]}>Customize your experience on SparkNexa.</Text>
-            <MenuRow icon="options-outline" label="Content preferences" theme={activeTheme} />
-            <MenuRow icon="heart-outline" label="Reaction preferences" theme={activeTheme} />
-            <MenuRow icon="notifications-outline" label="Notifications" theme={activeTheme} />
-            <MenuRow icon="accessibility-outline" label="Accessibility" theme={activeTheme} />
+            <MenuRow icon="grid-outline" label="Content preferences" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'content-preferences', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="happy-outline" label="Reaction preferences" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'reaction-preferences', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="notifications-outline" label="Notifications" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'notification-settings', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="alarm-outline" label="Quiet hours" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'quiet-hours', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="accessibility-outline" label="Accessibility" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'accessibility-settings', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="flag-outline" label="Language & region" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'language-region', from: 'settings' } })} theme={activeTheme} />
           </SettingsSection>
 
           {/* --- DISPLAY & BEHAVIOR --- */}
@@ -197,43 +257,147 @@ export default function SettingsScreen() {
                 </View>
                 <View style={styles.rowContent}>
                   <Text style={[styles.rowLabel, { color: activeTheme.text }]}>App language</Text>
-                  <Text style={[styles.rowSub, { color: activeTheme.textMuted }]}>{selectedLanguage.label}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color={activeTheme.textMuted} />
+                <View style={styles.rowRight}>
+                  <Text style={[styles.rowValue, { color: activeTheme.textMuted }]}>{selectedLanguage.label}</Text>
+                  <Ionicons name="chevron-forward" size={16} color={activeTheme.textMuted} />
+                </View>
               </View>
             </TouchableOpacity>
             <View style={[styles.divider, { backgroundColor: activeTheme.border, marginLeft: 50 }]} />
-            <MenuRow icon="folder-open-outline" label="Storage and data" onPress={() => router.push('/storage-data')} theme={activeTheme} />
-            <MenuRow icon="timer-outline" label="Time management" theme={activeTheme} />
-            <MenuRow icon="globe-outline" label="Browser" theme={activeTheme} />
-            <MenuRow icon="camera-outline" label="Camera roll suggestions" theme={activeTheme} />
-            <MenuRow icon="sparkles-outline" label="Early access to features" 
+            <MenuRow icon="folder-open-outline" label="Storage and data" onPress={() => router.push({ pathname: '/storage-data', params: { from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="timer-outline" label="Time management" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'time-management', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="globe-outline" label="Browser" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'browser-settings', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="camera-outline" label="Camera roll suggestions" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'camera-roll-suggestions', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="rocket-outline" label="Early access to features" 
               right={<Switch value={toggles.earlyAccess} onValueChange={() => updateToggle('earlyAccess')} trackColor={{true: accentColor}} />}
               theme={activeTheme} />
           </SettingsSection>
 
-          {/* --- ACCOUNT STATUS --- */}
-          <SettingsSection label="Account Status" theme={activeTheme}>
-            <MenuRow icon="radio-button-on-outline" label="Active status" 
+          {/* --- ACCOUNT STATUS & PRESENCE --- */}
+          <SettingsSection label="Account Status & Presence" theme={activeTheme}>
+            <MenuRow
+              icon="school-outline"
+              label="Current Learning Mode"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'learning-mode', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="radio-button-on-outline"
+              label="Show when you're online"
               right={<Switch value={toggles.activeStatus} onValueChange={() => updateToggle('activeStatus')} trackColor={{true: accentColor}} />}
-              theme={activeTheme} />
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="pulse-outline"
+              label="Show current activity"
+              right={<Switch value={toggles.showCurrentActivity} onValueChange={() => updateToggle('showCurrentActivity')} trackColor={{true: accentColor}} />}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="moon-outline"
+              label="Zen Study"
+              right={<Switch value={toggles.zenStudy} onValueChange={() => updateToggle('zenStudy')} trackColor={{true: accentColor}} />}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="calendar-outline"
+              label="Schedule Do Not Disturb"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'focus-schedule', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="flame-outline"
+              label="Current learning streak"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'learning-streak', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="eye-off-outline"
+              label="Reputation visibility"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'reputation-visibility', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="ribbon-outline"
+              label="Badges display"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'badges-display', from: 'settings' } })}
+              theme={activeTheme}
+            />
           </SettingsSection>
 
-          {/* --- PAYMENTS --- */}
-          <SettingsSection label="Payments" theme={activeTheme}>
-            <Text style={[styles.descText, { color: activeTheme.textMuted }]}>Manage your payment info and activity.</Text>
-            <MenuRow icon="card-outline" label="Ads payments" theme={activeTheme} />
-            <MenuRow icon="cash-outline" label="Payouts" theme={activeTheme} />
+          {/* --- WALLET & SPARK FUNDS --- */}
+          <SettingsSection label="Wallet & Spark Funds" theme={activeTheme}>
+            <MenuRow
+              icon="wallet-outline"
+              label="Spark Wallet balance"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'wallet-balance', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="card-outline"
+              label="Payment methods"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'payment-methods', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="layers-outline"
+              label="Subscription hub"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'subscription-hub', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="cash-outline"
+              label="Payouts & earnings"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'payouts-earnings', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="receipt-outline"
+              label="Transaction history"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'transaction-history', from: 'settings' } })}
+              theme={activeTheme}
+            />
           </SettingsSection>
 
-          {/* --- YOUR ACTIVITY --- */}
-          <SettingsSection label="Your activity" theme={activeTheme}>
-            <Text style={[styles.descText, { color: activeTheme.textMuted }]}>Review your activity and content you're tagged in.</Text>
-            <MenuRow icon="document-text-outline" label="Activity log" theme={activeTheme} />
-            <MenuRow icon="phone-portrait-outline" label="Device permissions" theme={activeTheme} />
-            <MenuRow icon="apps-outline" label="Apps and websites" theme={activeTheme} />
-            <MenuRow icon="briefcase-outline" label="Business integrations" theme={activeTheme} />
-            <MenuRow icon="help-circle-outline" label="Learn how to manage your information" theme={activeTheme} />
+          {/* --- YOUR LEARNING & SOCIAL FOOTPRINT --- */}
+          <SettingsSection label="Your Learning & Social Footprint" theme={activeTheme}>
+            <MenuRow
+              icon="analytics-outline"
+              label="Learning analytics"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'learning-analytics', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="newspaper-outline"
+              label="Community contributions"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'community-contributions', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="people-outline"
+              label="Mentions & collaborations"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'mentions-collaborations', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="phone-portrait-outline"
+              label="Device & privacy center"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'device-privacy-center', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="link-outline"
+              label="Connected platforms"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'connected-platforms', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="sparkles-outline"
+              label="AI Assistant memory"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'ai-assistant-memory', from: 'settings' } })}
+              theme={activeTheme}
+            />
           </SettingsSection>
 
           {/* --- PRIVACY & SECURITY --- */}
@@ -241,21 +405,57 @@ export default function SettingsScreen() {
             <MenuRow
               icon="lock-closed-outline"
               label="App lock"
-              sub="Biometric unlock and auto-lock timing"
-              onPress={() => router.push('/app-lock')}
+              onPress={() => router.push({ pathname: '/app-lock', params: { from: 'settings' } })}
               theme={activeTheme}
             />
-            <MenuRow icon="shield-half-outline" label="Neural Encryption" sub="AES-256 Active" theme={activeTheme} />
-            <MenuRow icon="people-circle-outline" label="How people find and contact you" onPress={() => router.push('/privacy')} theme={activeTheme} />
+            <MenuRow
+              icon="finger-print-outline"
+              label="End-to-end encryption"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'end-to-end-encryption', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow icon="shield-half-outline" label="Neural Encryption" theme={activeTheme} />
+            <MenuRow icon="people-circle-outline" label="How people find and contact you" onPress={() => router.push({ pathname: '/privacy', params: { from: 'settings' } })} theme={activeTheme} />
+            <MenuRow
+              icon="chatbox-outline"
+              label="Who can message you"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'who-can-message-you', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="ban-outline"
+              label="Blocked users"
+              onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'blocked-users', from: 'settings' } })}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="stats-chart-outline"
+              label="Study data privacy"
+              right={<Switch value={toggles.studyDataPrivacy} onValueChange={() => updateToggle('studyDataPrivacy')} trackColor={{true: accentColor}} />}
+              theme={activeTheme}
+            />
+            <MenuRow
+              icon="cloud-offline-outline"
+              label="Hide online status while studying"
+              right={<Switch value={toggles.hideOnlineWhileStudying} onValueChange={() => updateToggle('hideOnlineWhileStudying')} trackColor={{true: accentColor}} />}
+              theme={activeTheme}
+            />
           </SettingsSection>
 
           {/* --- COMMUNITY STANDARDS & POLICIES --- */}
           <SettingsSection label="Community standards and legal policies" theme={activeTheme}>
-            <MenuRow icon="document-outline" label="Terms of Service" theme={activeTheme} />
-            <MenuRow icon="shield-checkmark-outline" label="Privacy Policy" theme={activeTheme} />
-            <MenuRow icon="shield-outline" label="Cookies policy" theme={activeTheme} />
-            <MenuRow icon="warning-outline" label="Community Standards" theme={activeTheme} />
-            <MenuRow icon="information-circle-outline" label="About" theme={activeTheme} />
+            <MenuRow icon="document-outline" label="Terms of Service" onPress={() => router.push({ pathname: '/terms', params: { from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="document-text-outline" label="Privacy Policy" onPress={() => router.push({ pathname: '/privacy-policy', params: { from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="shield-outline" label="Cookies policy" onPress={() => router.push({ pathname: '/cookies-policy', params: { from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="bookmarks-outline" label="Academic Integrity Standards" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'academic-integrity', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="document-attach-outline" label="Copyright & DMCA" onPress={() => router.push({ pathname: '/settings-detail/[slug]', params: { slug: 'copyright-dmca', from: 'settings' } })} theme={activeTheme} />
+            <MenuRow icon="warning-outline" label="Community Standards" onPress={() => router.push({ pathname: '/community-standards', params: { from: 'settings' } })} theme={activeTheme} />
+            <MenuRow
+              icon="information-circle-outline"
+              label="About"
+              onPress={() => router.push({ pathname: '/about', params: { from: 'settings' } })}
+              theme={activeTheme}
+            />
           </SettingsSection>
 
           {/* --- LOGOUT --- */}
@@ -270,7 +470,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
 
           <View style={styles.footer}>
-            <Text style={[styles.footerText, { color: activeTheme.textMuted }]}>SPARK NEXA NODE v2.6.0</Text>
+            <Text style={[styles.footerText, { color: activeTheme.textMuted }]}>SPARKNEXAJX v2.6.0</Text>
           </View>
 
         </ScrollView>
@@ -315,31 +515,31 @@ export default function SettingsScreen() {
 
       {/* --- ADD GROUP/COMMUNITY MODAL --- */}
       <Modal visible={isAddModalVisible} animationType="slide" presentationStyle="overFullScreen" transparent>
-        <BlurView intensity={80} tint={isDark ? 'dark' : 'light'} style={[styles.modalContent, { justifyContent: 'center' }]}> 
-          <View style={[styles.addModalBody, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}> 
+        <View style={[styles.modalContent, { justifyContent: 'center', backgroundColor: activeTheme.background }]}> 
+          <View style={[styles.addModalBody, { backgroundColor: isDark ? '#0B0B1E' : '#FFFFFF', borderColor: activeTheme.border }]}> 
             <Text style={[styles.modalTitle, { color: activeTheme.text, marginBottom: 20 }]}>Create or Manage</Text>
             <TouchableOpacity style={styles.addOption} onPress={() => {
                 setIsAddModalVisible(false);
-                router.push('/groups/new');
+                router.push({ pathname: '/groups/new', params: { from: 'settings' } });
             }}> 
               <Text style={[styles.rowLabel, { color: activeTheme.text }]}>New Group</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.addOption} onPress={() => {
                 setIsAddModalVisible(false);
-                router.push('/communities/new');
+                router.push({ pathname: '/communities/new', params: { from: 'settings' } });
             }}> 
               <Text style={[styles.rowLabel, { color: activeTheme.text }]}>New Community</Text>
             </TouchableOpacity>
             <View style={[styles.divider, { backgroundColor: activeTheme.border, marginVertical: 20 }]} />
             <TouchableOpacity style={styles.addOption} onPress={() => {
                 setIsAddModalVisible(false);
-                router.push('/groups');
+                router.push({ pathname: '/groups', params: { from: 'settings' } });
             }}>
               <Text style={[styles.rowLabel, { color: activeTheme.text }]}>Your Groups</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.addOption} onPress={() => {
                 setIsAddModalVisible(false);
-                router.push('/communities');
+                router.push({ pathname: '/communities', params: { from: 'settings' } });
             }}>
               <Text style={[styles.rowLabel, { color: activeTheme.text }]}>Your Communities</Text>
             </TouchableOpacity>
@@ -347,7 +547,7 @@ export default function SettingsScreen() {
               <Text style={{ color: '#FFF', fontWeight: '700' }}>Close</Text>
             </TouchableOpacity>
           </View>
-        </BlurView>
+        </View>
       </Modal>
 
       {/* --- EDIT PROFILE MODAL --- */}
@@ -391,7 +591,7 @@ function SettingsSection({ label, children, theme }: any) {
   );
 }
 
-function MenuRow({ icon, label, sub, right, theme, onPress }: any) {
+function MenuRow({ icon, label, right, theme, onPress }: any) {
   return (
     <TouchableOpacity disabled={!onPress} onPress={onPress}>
       <View style={styles.row}>
@@ -400,7 +600,6 @@ function MenuRow({ icon, label, sub, right, theme, onPress }: any) {
         </View>
         <View style={styles.rowContent}>
           <Text style={[styles.rowLabel, { color: theme.text }]}>{label}</Text>
-          {sub && <Text style={[styles.rowSub, { color: theme.textMuted }]}>{sub}</Text>}
         </View>
         {right ? right : <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />}
       </View>
@@ -438,8 +637,22 @@ const styles = StyleSheet.create({
   profileCard: { borderRadius: 32, padding: 24, marginBottom: 30, overflow: 'hidden' },
   profileRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   avatarContainer: { position: 'relative' },
-  avatarBlur: { width: 72, height: 72, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' },
-  avatarText: { fontSize: 32, fontWeight: '900', color: '#FFF' },
+  avatarRing: {
+    width: 78,
+    height: 78,
+    borderRadius: 26,
+    padding: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+  },
+  avatarImage: { width: '100%', height: '100%', borderRadius: 22, resizeMode: 'cover', backgroundColor: 'rgba(255,255,255,0.2)' },
+  avatarFallback: { flex: 1, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center' },
+  avatarText: { fontSize: 30, fontWeight: '900', color: '#FFF' },
   profileInfo: { flex: 1 },
   profileName: { fontSize: 24, fontWeight: '900', color: '#FFF', letterSpacing: -0.5 },
   profileEmail: { fontSize: 13, color: 'rgba(255,255,255,0.7)', fontWeight: '600', marginTop: 4 },
@@ -452,11 +665,11 @@ const styles = StyleSheet.create({
   rowLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   iconBox: { width: 38, height: 38, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
   rowContent: { flex: 1 },
+  rowRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   rowLabel: { fontSize: 15, fontWeight: '700' },
-  rowSub: { fontSize: 11, marginTop: 2, fontWeight: '500' },
+  rowValue: { fontSize: 12, fontWeight: '600' },
   divider: { height: 1, marginHorizontal: 0, opacity: 0.3 },
-  
-  descText: { fontSize: 13, fontWeight: '500', paddingHorizontal: 16, paddingTop: 6, paddingBottom: 12, lineHeight: 18 },
+
   moreLink: { paddingHorizontal: 16, paddingVertical: 12 },
   moreLinkText: { fontSize: 13, fontWeight: '700', letterSpacing: 0.3 },
 

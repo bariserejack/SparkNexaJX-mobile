@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +11,6 @@ import { useAppTheme } from '../lib/theme';
 type EditItem = {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
-  sub?: string;
   visibility?: 'Public' | 'Only me';
   editable?: boolean;
 };
@@ -31,11 +30,10 @@ const SECTIONS: EditSection[] = [
     title: 'Intro',
     collapsible: true,
     items: [
-      { icon: 'hand-left-outline', label: 'Bio', sub: '', editable: true },
+      { icon: 'hand-left-outline', label: 'Bio', editable: true },
       {
         icon: 'pin-outline',
         label: 'Pinned details',
-        sub: '',
         editable: true,
       },
     ],
@@ -65,9 +63,9 @@ const SECTIONS: EditSection[] = [
     collapsible: true,
     items: [
       { icon: 'briefcase-outline', label: 'Work experience' },
-      { icon: 'briefcase-outline', label: 'Current role', sub: '', visibility: 'Public', editable: true },
-      { icon: 'briefcase-outline', label: 'Workplace', sub: '', visibility: 'Public', editable: true },
-      { icon: 'briefcase-outline', label: 'Previous role', sub: '', visibility: 'Public', editable: true },
+      { icon: 'briefcase-outline', label: 'Current role', visibility: 'Public', editable: true },
+      { icon: 'briefcase-outline', label: 'Workplace', visibility: 'Public', editable: true },
+      { icon: 'briefcase-outline', label: 'Previous role', visibility: 'Public', editable: true },
     ],
   },
   {
@@ -107,12 +105,13 @@ const SECTIONS: EditSection[] = [
 
 export default function EditProfileScreen() {
   const { activeTheme, isDark } = useAppTheme();
+  const handleBack = () => router.back();
 
   return (
     <View style={[styles.container, { backgroundColor: activeTheme.background }]}>
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={[styles.header, { borderBottomColor: activeTheme.border }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Edit profile</Text>
@@ -180,7 +179,6 @@ function EditRow({ item, theme }: { item: EditItem; theme: any }) {
       </View>
       <View style={styles.rowTextWrap}>
         <Text style={[styles.rowLabel, { color: theme.text }]}>{item.label}</Text>
-        {item.sub ? <Text style={[styles.rowSub, { color: theme.textMuted }]}>{item.sub}</Text> : null}
         {item.visibility ? (
           <View style={styles.visibilityRow}>
             <Ionicons name={item.visibility === 'Public' ? 'globe-outline' : 'lock-closed-outline'} size={16} color={theme.textMuted} />
@@ -279,7 +277,6 @@ const styles = StyleSheet.create({
   },
   rowTextWrap: { flex: 1, paddingRight: 10 },
   rowLabel: { fontSize: 16, fontWeight: '700', letterSpacing: -0.1 },
-  rowSub: { marginTop: 2, fontSize: 13, lineHeight: 18, fontWeight: '500' },
   visibilityRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
   visibilityText: { fontSize: 12, fontWeight: '600' },
   divider: { height: 1, marginLeft: 52 },

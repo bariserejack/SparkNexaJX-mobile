@@ -13,7 +13,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router, useNavigation } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import Animated, { 
   FadeInRight, 
@@ -107,7 +106,7 @@ export default function LearnScreen() {
       {/* Background Atmosphere */}
       <View style={[styles.bgOrb, { top: -50, right: -50, backgroundColor: Theme.brand.primary, opacity: isDark ? 0.1 : 0.05 }]} />
 
-      <BlurView intensity={isDark ? 20 : 80} tint={activeTheme.tint as any} style={[styles.headerContainer, { borderBottomColor: activeTheme.border }]}>
+      <View style={[styles.headerContainer, { borderBottomColor: activeTheme.border, backgroundColor: activeTheme.background }]}>
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.topAction} onPress={openDrawer}>
             <Ionicons name="reorder-three-outline" size={16} color={activeTheme.text} />
@@ -121,13 +120,12 @@ export default function LearnScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.headerContent}>
-          <Text style={[styles.headerSubtitle, { color: Theme.brand.primary }]}>KNOWLEDGE ARCHIVE</Text>
           <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Blueprints</Text>
         </View>
-      </BlurView>
+      </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        
+
         {/* Neural Progress Tracker */}
         <Animated.View entering={FadeInDown.delay(200)} style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -140,6 +138,66 @@ export default function LearnScreen() {
             <SkillNode icon="server" label="Backend Mastery" progress={45} theme={activeTheme} />
           </View>
         </Animated.View>
+
+        <View style={[styles.nexaBrainCard, { borderColor: activeTheme.border, backgroundColor: activeTheme.card }]}>
+          <LinearGradient
+            colors={isDark ? ['rgba(115,103,240,0.18)', 'rgba(79,172,254,0.05)'] : ['rgba(115,103,240,0.14)', 'rgba(79,172,254,0.03)']}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={styles.nexaHeader}>
+            <View style={[styles.nexaIconWrap, { backgroundColor: activeTheme.background }]}>
+              <Ionicons name="sparkles" size={16} color={Theme.brand.primary} />
+            </View>
+            <View style={styles.nexaTextWrap}>
+              <Text style={[styles.nexaTitle, { color: activeTheme.text }]}>Nexa Brain</Text>
+              <Text style={[styles.nexaSub, { color: activeTheme.textMuted }]}>
+                Summaries, flashcards, and smart study plans in seconds.
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.nexaAction, { backgroundColor: Theme.brand.primary }]}
+              onPress={() => router.push('/nexa-brain')}
+            >
+              <Ionicons name="arrow-forward" size={16} color="#FFF" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.nexaQuickRow}>
+            <TouchableOpacity
+              style={[styles.nexaQuick, { backgroundColor: activeTheme.background }]}
+              onPress={() => router.push({ pathname: '/nexa-brain', params: { focus: 'summary' } })}
+            >
+              <Ionicons name="flash-outline" size={16} color={Theme.brand.primary} />
+              <Text style={[styles.nexaQuickText, { color: activeTheme.text }]}>Pulse Summary</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.nexaQuick, { backgroundColor: activeTheme.background }]}
+              onPress={() => router.push({ pathname: '/nexa-brain', params: { focus: 'flashcards' } })}
+            >
+              <Ionicons name="albums-outline" size={16} color={Theme.brand.primary} />
+              <Text style={[styles.nexaQuickText, { color: activeTheme.text }]}>Auto Flashcards</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.nexaQuick, { backgroundColor: activeTheme.background }]}
+              onPress={() => router.push({ pathname: '/nexa-brain', params: { focus: 'rooms' } })}
+            >
+              <Ionicons name="mic-outline" size={16} color={Theme.brand.primary} />
+              <Text style={[styles.nexaQuickText, { color: activeTheme.text }]}>Study Rooms</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.nexaFooter}>
+            <View style={styles.nexaStreak}>
+              <Ionicons name="flame-outline" size={14} color={Theme.brand.primary} />
+              <Text style={[styles.nexaStreakText, { color: activeTheme.textMuted }]}>Learning streak: 12 days</Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.nexaFocusBtn, { borderColor: activeTheme.border }]}
+              onPress={() => router.push({ pathname: '/nexa-brain', params: { focus: 'focus' } })}
+            >
+              <Ionicons name="leaf-outline" size={14} color={Theme.brand.primary} />
+              <Text style={[styles.nexaFocusText, { color: activeTheme.text }]}>Focus Mode</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
         {/* Featured Mastery Card */}
         <View style={styles.tutorialContainer}>
@@ -212,9 +270,24 @@ const styles = StyleSheet.create({
   },
   topTitle: { fontSize: 20, fontWeight: '900', letterSpacing: -0.3 },
   headerContent: { paddingHorizontal: 25 },
-  headerSubtitle: { fontSize: 10, fontWeight: "900", letterSpacing: 2, marginBottom: 5 },
   headerTitle: { fontSize: 34, fontWeight: "900", letterSpacing: -1 },
   scrollContent: { paddingTop: 194 },
+
+  nexaBrainCard: { borderRadius: 26, borderWidth: 1, padding: 16, overflow: 'hidden', marginHorizontal: 25, marginBottom: 24 },
+  nexaHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  nexaIconWrap: { width: 34, height: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  nexaTextWrap: { flex: 1 },
+  nexaTitle: { fontSize: 18, fontWeight: '900', letterSpacing: -0.4 },
+  nexaSub: { fontSize: 12, fontWeight: '600', marginTop: 4 },
+  nexaAction: { width: 34, height: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  nexaQuickRow: { flexDirection: 'row', gap: 10, marginTop: 14, flexWrap: 'wrap' },
+  nexaQuick: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 14 },
+  nexaQuickText: { fontSize: 12, fontWeight: '700' },
+  nexaFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 },
+  nexaStreak: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  nexaStreakText: { fontSize: 11, fontWeight: '700' },
+  nexaFocusBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, borderWidth: 1 },
+  nexaFocusText: { fontSize: 11, fontWeight: '700' },
   
   section: { marginBottom: 35 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 25, marginBottom: 15 },

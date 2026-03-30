@@ -19,6 +19,7 @@ import Animated, { FadeIn, FadeInRight, FadeInUp, Layout } from "react-native-re
 import { BlurView } from "expo-blur";
 import { Theme } from "../constants/Theme";
 import { useAppTheme } from "../lib/theme";
+import { useDrawerBack } from "../lib/useDrawerBack";
 
 const { width } = Dimensions.get("window");
 
@@ -34,6 +35,7 @@ type VaultFile = {
 
 export default function VaultScreen() {
   const { activeTheme, isDark } = useAppTheme();
+  const handleBack = useDrawerBack();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [isUploading, setIsUploading] = useState(false);
@@ -96,9 +98,18 @@ export default function VaultScreen() {
         <View style={[styles.glowTarget, { opacity: isDark ? 0.1 : 0.06 }]} />
 
         <View style={styles.header}>
-          <View>
-            <Text style={styles.headerSubtitle}>SECURE ASSETS</Text>
-            <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Vault</Text>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity
+              onPress={handleBack}
+              style={[styles.backButton, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+            >
+              <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
+            </TouchableOpacity>
+            <View>
+              <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Vault</Text>
+            </View>
           </View>
           <TouchableOpacity style={[styles.infoCircle, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}>
             <Ionicons name="shield-checkmark" size={16} color={Theme.brand.primary} />
@@ -221,7 +232,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-end",
   },
-  headerSubtitle: { color: Theme.brand.primary, fontSize: 10, fontWeight: "900", letterSpacing: 2 },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  backButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headerTitle: { fontSize: 36, fontWeight: "900", letterSpacing: -1.5 },
   infoCircle: {
     width: 44,

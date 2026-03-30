@@ -1,16 +1,26 @@
+import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
 import { Theme } from '../constants/Theme';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemeProvider, useAppTheme } from '../lib/theme';
 import CustomDrawerContent from '../assets/components/CustomDrawerContent';
+import { useFonts, Roboto_700Bold } from '@expo-google-fonts/roboto';
 
 function drawerIcon(name: keyof typeof Ionicons.glyphMap) {
   return ({ color }: { color: string }) => <Ionicons name={name} size={16} color={color} />;
 }
 
 function RootDrawer() {
-  const { activeTheme, themeMode } = useAppTheme();
+  const { activeTheme, themeMode, isReady } = useAppTheme();
+
+  if (!isReady) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Theme.light.background }}>
+        <ActivityIndicator size="large" color={Theme.brand.primary} />
+      </View>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -99,6 +109,18 @@ function RootDrawer() {
           }}
         />
         <Drawer.Screen
+          name="tune-requests"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="tune-request-detail"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="tuned-profile"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
           name="settings"
           options={{
             drawerLabel: 'Settings',
@@ -115,6 +137,30 @@ function RootDrawer() {
         />
         <Drawer.Screen
           name="help"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="about"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="terms"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="privacy-policy"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="cookies-policy"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="community-standards"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="settings-detail/[slug]"
           options={{ drawerItemStyle: { display: 'none' } }}
         />
         <Drawer.Screen
@@ -138,7 +184,39 @@ function RootDrawer() {
           options={{ drawerItemStyle: { display: 'none' } }}
         />
         <Drawer.Screen
+          name="new-contact"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="country-picker"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="contact-settings"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="study-room"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
           name="app-lock"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="groups/index"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="groups/new"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="communities/index"
+          options={{ drawerItemStyle: { display: 'none' } }}
+        />
+        <Drawer.Screen
+          name="communities/new"
           options={{ drawerItemStyle: { display: 'none' } }}
         />
 
@@ -160,6 +238,16 @@ function RootDrawer() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({ Roboto_700Bold });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Theme.light.background }}>
+        <ActivityIndicator size="large" color={Theme.brand.primary} />
+      </View>
+    );
+  }
+
   return (
     <ThemeProvider>
       <RootDrawer />

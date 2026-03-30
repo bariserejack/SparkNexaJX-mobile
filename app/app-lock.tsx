@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 
@@ -33,6 +33,19 @@ const AUTO_LOCK_OPTIONS: Array<{ key: AutoLockOption; label: string }> = [
 
 export default function AppLockScreen() {
   const { activeTheme } = useAppTheme();
+  const { from } = useLocalSearchParams<{ from?: string }>();
+
+  const handleBack = () => {
+    if (from === 'settings') {
+      router.replace('/settings');
+      return;
+    }
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace('/settings');
+  };
   const [settings, setSettings] = useState<AppLockSettings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
@@ -69,7 +82,7 @@ export default function AppLockScreen() {
     <View style={[styles.container, { backgroundColor: activeTheme.background }]}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={[styles.header, { borderBottomColor: activeTheme.border }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: activeTheme.text }]}>App lock</Text>
@@ -81,9 +94,6 @@ export default function AppLockScreen() {
             <View style={styles.row}>
               <View style={styles.rowTextWrap}>
                 <Text style={[styles.rowLabel, { color: activeTheme.text }]}>Unlock with biometric</Text>
-                <Text style={[styles.rowSub, { color: activeTheme.textMuted }]}>
-                  Use fingerprint, face, or other unique identifiers to open SparkNexa.
-                </Text>
               </View>
               <Switch
                 value={settings.biometricEnabled}
@@ -121,9 +131,6 @@ export default function AppLockScreen() {
             <View style={styles.row}>
               <View style={styles.rowTextWrap}>
                 <Text style={[styles.rowLabel, { color: activeTheme.text }]}>Show content in notifications</Text>
-                <Text style={[styles.rowSub, { color: activeTheme.textMuted }]}>
-                  Preview sender and message text inside new notifications.
-                </Text>
               </View>
               <Switch
                 value={settings.showNotificationContent}
@@ -165,7 +172,6 @@ const styles = StyleSheet.create({
   },
   rowTextWrap: { flex: 1 },
   rowLabel: { fontSize: 16, fontWeight: '700', letterSpacing: -0.1 },
-  rowSub: { fontSize: 13, fontWeight: '500', marginTop: 4, lineHeight: 19 },
   autoLockBlock: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 10 },
   radioRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },
   radioLabel: { fontSize: 18, fontWeight: '500' },

@@ -14,13 +14,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { getNotifications, notificationsSupportedInRuntime } from '../lib/notifications';
 
 import { Theme } from '../constants/Theme';
 import { useAppTheme } from '../lib/theme';
 import { apiUrl } from '../lib/api';
+import { useDrawerBack } from '../lib/useDrawerBack';
 
 // Notification handler will be set when `expo-notifications` is loaded lazily.
 
@@ -225,7 +225,7 @@ async function scheduleReminderNotification(
 
 export default function RemindersScreen() {
   const { activeTheme } = useAppTheme();
-  const navigation = useNavigation();
+  const handleBack = useDrawerBack();
 
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -239,18 +239,6 @@ export default function RemindersScreen() {
   const [dateValue, setDateValue] = useState(todayString());
   const [timeValue, setTimeValue] = useState(timeString());
   const [repeatDaily, setRepeatDaily] = useState(false);
-
-  const openDrawer = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const parent = (navigation as any).getParent?.();
-    if (parent?.openDrawer) {
-      parent.openDrawer();
-      return;
-    }
-    if ((navigation as any).openDrawer) {
-      (navigation as any).openDrawer();
-    }
-  };
 
   const pendingCount = useMemo(
     () => reminders.filter((item) => item.status === 'pending').length,
@@ -463,15 +451,22 @@ export default function RemindersScreen() {
     <View style={[styles.container, { backgroundColor: activeTheme.background }]}>
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <View style={styles.topBar}>
-          <TouchableOpacity onPress={openDrawer} style={styles.topAction}>
-            <Ionicons name="reorder-three-outline" size={16} color={activeTheme.text} />
+          <TouchableOpacity
+            onPress={handleBack}
+            style={[styles.backButton, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}
+          >
+            <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <View style={styles.topCenter}>
             <Text style={styles.topLabel}>DAILY PULSE</Text>
             <Text style={[styles.topTitle, { color: activeTheme.text }]}>Reminders</Text>
+            <Text style={[styles.topHint, { color: activeTheme.textMuted }]}>
+              Keep your day on track
+            </Text>
           </View>
-          <View style={styles.topAction}>
+          <View style={[styles.pendingPill, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}>
             <Text style={[styles.pendingCount, { color: Theme.brand.primary }]}>{pendingCount}</Text>
+            <Text style={[styles.pendingLabel, { color: activeTheme.textMuted }]}>Pending</Text>
           </View>
         </View>
 
@@ -481,10 +476,17 @@ export default function RemindersScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Theme.brand.primary} />}
         >
           <View style={[styles.card, { backgroundColor: activeTheme.cardElevated, borderColor: activeTheme.border }]}>
-            <Text style={[styles.cardTitle, { color: activeTheme.text }]}>Quick Add Reminder</Text>
-            <Text style={[styles.cardHint, { color: activeTheme.textMuted }]}>
-              Create a task with time. It will ring on this device when due.
-            </Text>
+            <View style={styles.cardHeader}>
+              <View style={[styles.cardIcon, { backgroundColor: `${Theme.brand.primary}1A` }]}>
+                <Ionicons name="alarm-outline" size={16} color={Theme.brand.primary} />
+              </View>
+              <View style={styles.cardTitleWrap}>
+                <Text style={[styles.cardTitle, { color: activeTheme.text }]}>Quick Add Reminder</Text>
+                <Text style={[styles.cardHint, { color: activeTheme.textMuted }]}>
+                  Create a task with time. It will ring on this device when due.
+                </Text>
+              </View>
+            </View>
 
             <TextInput
               value={title}
@@ -549,7 +551,15 @@ export default function RemindersScreen() {
           </View>
 
           <View style={[styles.card, { backgroundColor: activeTheme.cardElevated, borderColor: activeTheme.border }]}>
-            <Text style={[styles.cardTitle, { color: activeTheme.text }]}>Today & Upcoming</Text>
+            <View style={styles.cardHeader}>
+              <View style={[styles.cardIcon, { backgroundColor: `${Theme.brand.accent}1A` }]}>
+                <Ionicons name="calendar-outline" size={16} color={Theme.brand.accent} />
+              </View>
+              <View style={styles.cardTitleWrap}>
+                <Text style={[styles.cardTitle, { color: activeTheme.text }]}>Today & Upcoming</Text>
+                <Text style={[styles.cardHint, { color: activeTheme.textMuted }]}>All scheduled reminders</Text>
+              </View>
+            </View>
 
             {loading ? (
               <View style={styles.loadingWrap}>
@@ -559,14 +569,26 @@ export default function RemindersScreen() {
               <Text style={[styles.emptyText, { color: activeTheme.textMuted }]}>No reminders yet.</Text>
             ) : (
               reminders.map((reminder) => (
-                <View key={reminder.id} style={[styles.itemRow, { borderColor: activeTheme.border }]}>
+                <View key={reminder.id} style={[styles.itemRow, { borderColor: activeTheme.border, backgroundColor: activeTheme.card }]}>
                   <View style={styles.itemMain}>
-                    <Text style={[styles.itemTitle, { color: activeTheme.text }]}>{reminder.title}</Text>
+                    <View style={styles.itemHeaderRow}>
+                      <Text style={[styles.itemTitle, { color: activeTheme.text }]}>{reminder.title}</Text>
+                      <View
+                        style={[
+                          styles.statusPill,
+                          {
+                            borderColor: statusColor(reminder.status),
+                            backgroundColor: `${statusColor(reminder.status)}1A`,
+                          },
+                        ]}
+                      >
+                        <Text style={[styles.statusPillText, { color: statusColor(reminder.status) }]}>
+                          {reminder.status.toUpperCase()}
+                        </Text>
+                      </View>
+                    </View>
                     <Text style={[styles.itemMeta, { color: activeTheme.textMuted }]}>
                       {formatSchedule(reminder.scheduled_at, reminder.repeat_type)}
-                    </Text>
-                    <Text style={[styles.itemStatus, { color: statusColor(reminder.status) }]}>
-                      {reminder.status.toUpperCase()}
                     </Text>
                   </View>
 
@@ -631,15 +653,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 12,
   },
-  topAction: {
+  backButton: {
     width: 40,
     height: 40,
     borderRadius: 14,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  topCenter: { alignItems: 'center' },
+  topCenter: { flex: 1 },
   topLabel: {
     color: Theme.brand.primary,
     fontSize: 10,
@@ -653,9 +677,29 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: -0.4,
   },
+  topHint: {
+    marginTop: 4,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  pendingPill: {
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    minWidth: 64,
+  },
   pendingCount: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '900',
+  },
+  pendingLabel: {
+    marginTop: 2,
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
   content: {
     paddingHorizontal: 20,
@@ -667,6 +711,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 20,
     padding: 16,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  cardIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardTitleWrap: {
+    flex: 1,
   },
   cardTitle: {
     fontSize: 18,
@@ -742,6 +801,11 @@ const styles = StyleSheet.create({
   itemMain: {
     flex: 1,
   },
+  itemHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   itemTitle: {
     fontSize: 15,
     fontWeight: '800',
@@ -751,11 +815,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  itemStatus: {
-    marginTop: 6,
-    fontSize: 11,
+  statusPill: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  statusPillText: {
+    fontSize: 9,
     fontWeight: '800',
-    letterSpacing: 0.8,
+    letterSpacing: 0.7,
   },
   itemActions: {
     flexDirection: 'row',

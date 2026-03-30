@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { 
   View, Text, StyleSheet, ScrollView, Dimensions, 
   ActivityIndicator, TouchableOpacity, Image, Platform
@@ -11,6 +11,7 @@ import * as Haptics from 'expo-haptics';
 import { supabase } from '../lib/supabase';
 import { Theme } from '../constants/Theme';
 import { useAppTheme } from '../lib/theme';
+import { useDrawerBack } from '../lib/useDrawerBack';
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -26,6 +27,7 @@ export default function AnalyticsScreen() {
 
   const { activeTheme, isDark } = useAppTheme();
   const primaryColor = Theme.brand?.primary || '#7367f0';
+  const handleBack = useDrawerBack();
 
   useEffect(() => {
     fetchAnalytics();
@@ -75,9 +77,16 @@ export default function AnalyticsScreen() {
           
           {/* Header */}
           <View style={styles.header}>
-            <View>
-              <Text style={styles.headerSubtitle}>NEURAL INSIGHTS</Text>
-              <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Analytics</Text>
+            <View style={styles.headerLeft}>
+              <TouchableOpacity
+                style={[styles.backBtn, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}
+                onPress={handleBack}
+              >
+                <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
+              </TouchableOpacity>
+              <View>
+                <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Analytics</Text>
+              </View>
             </View>
             <TouchableOpacity
               style={[styles.iconCircle, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}
@@ -98,7 +107,7 @@ export default function AnalyticsScreen() {
                 <Text style={styles.heroLabel}>Total Bandwidth</Text>
                 <Text style={styles.heroNumber}>{stats.total * 12}GB</Text>
                 <View style={styles.heroBadge}>
-                  <Text style={styles.heroBadgeText}>⚡ Optimized</Text>
+                  <Text style={styles.heroBadgeText}>âš¡ Optimized</Text>
                 </View>
               </View>
               <Ionicons name="pulse" size={16} color="rgba(255,255,255,0.15)" style={styles.heroIcon} />
@@ -182,8 +191,9 @@ const styles = StyleSheet.create({
   bgGlow: { position: 'absolute', bottom: -100, right: -100, width: 300, height: 300, borderRadius: 150, backgroundColor: '#7367f0', opacity: 0.1, filter: Platform.OS === 'ios' ? 'blur(60px)' : undefined },
   scrollContent: { padding: 25, paddingTop: 60 },
   
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 30 },
-  headerSubtitle: { color: '#7367f0', fontSize: 10, fontWeight: '900', letterSpacing: 2, marginBottom: 4 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  backBtn: { width: 42, height: 42, borderRadius: 14, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
   headerTitle: { fontSize: 34, fontWeight: '900', letterSpacing: -1 },
   iconCircle: { width: 48, height: 48, borderRadius: 16, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
   

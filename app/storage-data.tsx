@@ -1,21 +1,34 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import { Theme } from '../constants/Theme';
 import { useAppTheme } from '../lib/theme';
 
 export default function StorageDataScreen() {
   const { activeTheme } = useAppTheme();
+  const { from } = useLocalSearchParams<{ from?: string }>();
+
+  const handleBack = () => {
+    if (from === 'settings') {
+      router.replace('/settings');
+      return;
+    }
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace('/settings');
+  };
   const [useLessDataForCalls, setUseLessDataForCalls] = useState(true);
 
   return (
     <View style={[styles.container, { backgroundColor: activeTheme.background }]}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={[styles.header, { borderBottomColor: activeTheme.border }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Storage and data</Text>
@@ -27,14 +40,12 @@ export default function StorageDataScreen() {
             <SettingRow
               icon="folder-open-outline"
               label="Manage storage"
-              sub="3.2 GB"
               theme={activeTheme}
             />
             <Divider theme={activeTheme} />
             <SettingRow
               icon="analytics-outline"
               label="Network usage"
-              sub="17.2 GB sent - 43.9 GB received"
               theme={activeTheme}
             />
             <Divider theme={activeTheme} />
@@ -45,26 +56,23 @@ export default function StorageDataScreen() {
               theme={activeTheme}
             />
             <Divider theme={activeTheme} />
-            <SettingRow label="Proxy" sub="Off" theme={activeTheme} />
+            <SettingRow label="Proxy" theme={activeTheme} />
           </View>
 
           <View style={[styles.card, { borderColor: activeTheme.border, backgroundColor: activeTheme.card, marginTop: 16 }]}>
-            <SettingRow icon="images-outline" label="Media upload quality" sub="Standard quality" theme={activeTheme} />
+            <SettingRow icon="images-outline" label="Media upload quality" theme={activeTheme} />
             <Divider theme={activeTheme} />
-            <SettingRow label="Auto-download quality" sub="Auto" theme={activeTheme} />
+            <SettingRow label="Auto-download quality" theme={activeTheme} />
           </View>
 
           <Text style={[styles.sectionLabel, { color: activeTheme.textMuted }]}>Media auto-download</Text>
-          <Text style={[styles.sectionSub, { color: activeTheme.textMuted }]}>
-            Voice messages are always automatically downloaded
-          </Text>
 
           <View style={[styles.card, { borderColor: activeTheme.border, backgroundColor: activeTheme.card, marginTop: 10 }]}>
-            <SettingRow label="When using mobile data" sub="No media" theme={activeTheme} />
+            <SettingRow label="When using mobile data" theme={activeTheme} />
             <Divider theme={activeTheme} />
-            <SettingRow label="When connected on Wi-Fi" sub="All media" theme={activeTheme} />
+            <SettingRow label="When connected on Wi-Fi" theme={activeTheme} />
             <Divider theme={activeTheme} />
-            <SettingRow label="When roaming" sub="No media" theme={activeTheme} />
+            <SettingRow label="When roaming" theme={activeTheme} />
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -75,12 +83,10 @@ export default function StorageDataScreen() {
 function SettingRow({
   icon,
   label,
-  sub,
   theme,
 }: {
   icon?: keyof typeof Ionicons.glyphMap;
   label: string;
-  sub?: string;
   theme: any;
 }) {
   return (
@@ -93,7 +99,6 @@ function SettingRow({
       ) : null}
       <View style={styles.rowTextWrap}>
         <Text style={[styles.rowLabel, { color: theme.text }]}>{label}</Text>
-        {sub ? <Text style={[styles.rowSub, { color: theme.textMuted }]}>{sub}</Text> : null}
       </View>
     </TouchableOpacity>
   );
@@ -166,9 +171,6 @@ const styles = StyleSheet.create({
   },
   rowTextWrap: { flex: 1 },
   rowLabel: { fontSize: 16, fontWeight: '700', letterSpacing: -0.1 },
-  rowSub: { marginTop: 2, fontSize: 13, fontWeight: '500', lineHeight: 18 },
   divider: { height: 1, marginLeft: 52 },
   sectionLabel: { marginTop: 16, fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.6 },
-  sectionSub: { marginTop: 2, fontSize: 13, fontWeight: '500', lineHeight: 18 },
 });
-

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
 import { Theme } from '../../constants/Theme';
@@ -14,6 +15,7 @@ export default function CustomDrawerContent(props: any) {
   const quickAccessLinks: Array<{ label: string; icon: keyof typeof Ionicons.glyphMap; path: string }> = [
     { label: 'Projects', icon: 'layers-outline', path: '/projects' },
     { label: 'Bolts', icon: 'flash-outline', path: '/(tabs)/explore' },
+    { label: 'Tune Orbit', icon: 'people-outline', path: '/tune-requests' },
     { label: 'Daily Reminders', icon: 'alarm-outline', path: '/reminders' },
     { label: 'Neural Pulse', icon: 'pulse-outline', path: '/pulse' },
     { label: 'Secure Vault', icon: 'shield-checkmark-outline', path: '/vault' },
@@ -24,7 +26,7 @@ export default function CustomDrawerContent(props: any) {
 
   const goTo = (path: string) => {
     props.navigation?.closeDrawer?.();
-    router.replace(path as any);
+    router.push(path as any);
   };
 
   return (
@@ -34,9 +36,20 @@ export default function CustomDrawerContent(props: any) {
           <AppLogo size={54} />
           <View>
             <Text style={[styles.title, { color: activeTheme.text }]}>SparkNexaJX</Text>
-            <Text style={[styles.subtitle, { color: activeTheme.textMuted }]}>Workspace</Text>
           </View>
         </View>
+
+        <TouchableOpacity style={[styles.nexaButton, { borderColor: activeTheme.border }]} onPress={() => goTo('/nexa-brain')}>
+          <LinearGradient colors={Theme.brand.primaryGradient} style={StyleSheet.absoluteFillObject} />
+          <View style={styles.nexaIcon}>
+            <Ionicons name="sparkles" size={16} color="#FFFFFF" />
+          </View>
+          <View style={styles.nexaText}>
+            <Text style={styles.nexaTitle}>Nexa Brain</Text>
+            <Text style={styles.nexaSub}>Summaries, flashcards, study rooms</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color="#FFFFFF" />
+        </TouchableOpacity>
 
         <View style={styles.menuWrap}>
           <Text style={[styles.quickAccessLabel, { color: activeTheme.textMuted }]}>QUICK ACCESS</Text>
@@ -91,17 +104,34 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
   },
-  subtitle: {
-    marginTop: 2,
-    fontSize: 12,
-    fontWeight: '600',
-  },
   menuWrap: {
     marginTop: 12,
     paddingHorizontal: 14,
     paddingTop: 12,
     gap: 8,
   },
+  nexaButton: {
+    marginTop: 14,
+    marginHorizontal: 14,
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+  },
+  nexaIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nexaText: { flex: 1 },
+  nexaTitle: { color: '#FFFFFF', fontSize: 14, fontWeight: '800' },
+  nexaSub: { color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: '600', marginTop: 2 },
   menuItem: {
     minHeight: 44,
     borderRadius: 12,

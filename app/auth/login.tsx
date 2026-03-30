@@ -19,10 +19,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 
 import { Theme } from '../../constants/Theme';
 import { supabase } from '../../lib/supabase';
 import { AppLogo } from '../../components/AppLogo';
+
+WebBrowser.maybeCompleteAuthSession();
 
 const palette = {
   page: '#F4F6FB',
@@ -51,11 +55,49 @@ export default function LoginScreen() {
   async function handleOAuthLogin(provider: 'google' | 'apple' | 'github') {
     setLoading(true);
     setErrorMsg(null);
-    const { error } = await supabase.auth.signInWithOAuth({ provider });
-    setLoading(false);
-    if (error) {
-      setErrorMsg(error.message);
-      Alert.alert('Login failed', error.message);
+    try {
+      const redirectTo = Linking.createURL('auth/callback');
+      if (Platform.OS === 'web') {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo,
+            skipBrowserRedirect: true,
+          },
+        });
+        if (error) throw error;
+        if (!data?.url) throw new Error('Unable to start OAuth flow.');
+        window.location.assign(data.url);
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo,
+          skipBrowserRedirect: true,
+        },
+      });
+      if (error) throw error;
+      if (!data?.url) throw new Error('Unable to start OAuth flow.');
+
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+      if (result.type !== 'success' || !result.url) return;
+
+      const url = new URL(result.url);
+      const code = url.searchParams.get('code');
+      if (!code) throw new Error('Missing OAuth code.');
+
+      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+      if (exchangeError) throw exchangeError;
+
+      router.replace('/(tabs)');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Login failed';
+      setErrorMsg(message);
+      Alert.alert('Login failed', message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -92,9 +134,11 @@ export default function LoginScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.brandWrap}>
-            <AppLogo size={74} />
+            <View style={styles.brandRow}>
+              <AppLogo size={74} />
+              <Text style={styles.appName}>SparkNexaJX</Text>
+            </View>
             <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Login with your existing account.</Text>
           </View>
 
           <View style={styles.card}>
@@ -186,16 +230,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  appName: {
+    color: palette.text,
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
   title: {
     color: palette.text,
     fontSize: 30,
     fontWeight: '800',
     letterSpacing: -0.4,
-  },
-  subtitle: {
-    marginTop: 6,
-    color: palette.textMuted,
-    fontSize: 14,
   },
   card: {
     borderRadius: 24,

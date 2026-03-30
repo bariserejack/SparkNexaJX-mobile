@@ -12,9 +12,9 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   FadeInDown,
@@ -27,6 +27,7 @@ import Animated, {
 import { Theme } from '../constants/Theme';
 import { useAppTheme } from '../lib/theme';
 import { API_BASE_URL, apiUrl } from '../lib/api';
+import { useDrawerBack } from '../lib/useDrawerBack';
 
 const { width } = Dimensions.get('window');
 
@@ -43,6 +44,25 @@ type ApiResponse<T> = {
   error?: string;
 };
 
+type Task = {
+  id: string;
+  title: string;
+  done: boolean;
+  due: string;
+};
+
+type Collaborator = {
+  id: string;
+  name: string;
+  role: string;
+  color: string;
+};
+
+type ProjectDetails = {
+  tasks: Task[];
+  collaborators: Collaborator[];
+};
+
 const STATUS_FLOW = ['building', 'active', 'blocked', 'done'];
 
 const STATUS_META: Record<string, { color: string; icon: keyof typeof Ionicons.glyphMap }> = {
@@ -51,6 +71,28 @@ const STATUS_META: Record<string, { color: string; icon: keyof typeof Ionicons.g
   blocked: { color: '#FF9F0A', icon: 'alert-circle-outline' },
   done: { color: '#8E8E93', icon: 'checkmark-circle-outline' },
 };
+
+const TASK_LIBRARY = [
+  'Scope requirements',
+  'Design wireframes',
+  'API endpoints',
+  'Integrate auth',
+  'QA pass',
+  'Deploy build',
+  'Feedback review',
+  'Docs & onboarding',
+];
+
+const DUE_LABELS = ['Today', 'Tomorrow', 'Fri', 'Mon', 'Next wk'];
+
+const COLLAB_LIBRARY: Collaborator[] = [
+  { id: 'c1', name: 'Amaka Dan', role: 'Design', color: '#7C3AED' },
+  { id: 'c2', name: 'Jonas Lee', role: 'Backend', color: '#2563EB' },
+  { id: 'c3', name: 'Ruth K.', role: 'Research', color: '#F97316' },
+  { id: 'c4', name: 'Tari M.', role: 'QA', color: '#10B981' },
+  { id: 'c5', name: 'Maya C.', role: 'Product', color: '#EC4899' },
+  { id: 'c6', name: 'Dara F.', role: 'Mobile', color: '#0EA5E9' },
+];
 
 type ThemeColors = {
   card: string;
@@ -95,28 +137,86 @@ function formatDate(iso: string) {
   return date.toLocaleDateString();
 }
 
+function seedFromString(value: string) {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) % 100000;
+  }
+  return Math.abs(hash);
+}
+
+function buildProjectDetails(project: Project): ProjectDetails {
+  const seed = seedFromString(`${project.id}-${project.title}`);
+  const taskCount = 3 + (seed % 3);
+  const collabCount = 2 + (seed % 3);
+
+  const tasks: Task[] = Array.from({ length: taskCount }).map((_, index) => ({
+    id: `${project.id}-task-${index}`,
+    title: TASK_LIBRARY[(seed + index) % TASK_LIBRARY.length],
+    due: DUE_LABELS[(seed + index) % DUE_LABELS.length],
+    done: (seed + index) % 3 === 0,
+  }));
+
+  const collaborators: Collaborator[] = Array.from({ length: collabCount }).map((_, index) => {
+    const base = COLLAB_LIBRARY[(seed + index) % COLLAB_LIBRARY.length];
+    return { ...base, id: `${project.id}-${base.id}` };
+  });
+
+  return { tasks, collaborators };
+}
+
+function getProgress(tasks: Task[]) {
+  if (tasks.length === 0) {
+    return 0;
+  }
+  const completed = tasks.filter((task) => task.done).length;
+  return Math.round((completed / tasks.length) * 100);
+}
+
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
+
 function ProjectTaskTile({
   project,
   index,
   theme,
-  isDark,
+  details,
   updatingId,
   deletingId,
   onCycleStatus,
   onDelete,
+  onOpenTasks,
+  onToggleTask,
 }: {
   project: Project;
   index: number;
   theme: ThemeColors;
-  isDark: boolean;
+  details?: ProjectDetails;
   updatingId: string | null;
   deletingId: string | null;
   onCycleStatus: (project: Project) => void;
   onDelete: (project: Project) => void;
+  onOpenTasks: (project: Project) => void;
+  onToggleTask: (projectId: string, taskId: string) => void;
 }) {
   const meta = getStatusMeta(project.status);
   const isUpdating = updatingId === project.id;
   const isDeleting = deletingId === project.id;
+  const tasks = details?.tasks ?? [];
+  const collaborators = details?.collaborators ?? [];
+  const progress = getProgress(tasks);
+  const collabSummary = collaborators
+    .slice(0, 3)
+    .map((collab) => collab.name.split(' ')[0])
+    .join(', ');
+  const collabOverflow = collaborators.length > 3 ? ` +${collaborators.length - 3} more` : '';
 
   return (
     <Animated.View entering={FadeInDown.delay(index * 80)}>
@@ -132,32 +232,113 @@ function ProjectTaskTile({
         onLongPress={() => onDelete(project)}
         activeOpacity={0.78}
       >
-        <View style={[styles.iconBox, { backgroundColor: `${meta.color}18` }]}>
-          <Ionicons name={meta.icon} size={16} color={meta.color} />
-        </View>
-        <View style={styles.tileContent}>
-          <Text style={[styles.tileLabel, { color: theme.text }]}>{project.title}</Text>
-          <View style={styles.subRow}>
-            <View style={[styles.miniIndicator, { backgroundColor: meta.color }]} />
-            <Text style={[styles.tileSub, { color: theme.textMuted }]}>
-              {formatPhase(project.status)} {formatDate(project.created_at)}
-            </Text>
+        <View style={styles.tileHeaderRow}>
+          <View style={[styles.iconBox, { backgroundColor: `${meta.color}18` }]}>
+            <Ionicons name={meta.icon} size={16} color={meta.color} />
+          </View>
+          <View style={styles.tileContent}>
+            <Text style={[styles.tileLabel, { color: theme.text }]}>{project.title}</Text>
+            <View style={styles.subRow}>
+              <View style={[styles.miniIndicator, { backgroundColor: meta.color }]} />
+              <Text style={[styles.tileSub, { color: theme.textMuted }]}>
+                {formatPhase(project.status)} {formatDate(project.created_at)}
+              </Text>
+            </View>
+          </View>
+          <View style={[styles.statusChip, { borderColor: meta.color }]}>
+            {isUpdating || isDeleting ? (
+              <ActivityIndicator size="small" color={meta.color} />
+            ) : (
+              <Text style={[styles.statusChipText, { color: meta.color }]}>{project.status}</Text>
+            )}
           </View>
         </View>
-        <View
-          style={[
-            styles.chevronBg,
-            {
-              backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.05)',
-            },
-          ]}
-        >
-          {isUpdating || isDeleting ? (
-            <ActivityIndicator size="small" color={meta.color} />
-          ) : (
-            <Ionicons name="chevron-forward" size={16} color={meta.color} />
-          )}
+
+        <View style={styles.progressRow}>
+          <Text style={[styles.progressLabel, { color: theme.textMuted }]}>Progress</Text>
+          <Text style={[styles.progressValue, { color: meta.color }]}>{progress}%</Text>
         </View>
+        <View style={[styles.progressTrack, { backgroundColor: theme.border }]}>
+          <View style={[styles.progressFill, { width: `${progress}%`, backgroundColor: meta.color }]} />
+        </View>
+
+        <View style={styles.tasksWrap}>
+          {tasks.slice(0, 3).map((task) => (
+            <TouchableOpacity
+              key={task.id}
+              style={styles.taskRow}
+              onPress={() => onToggleTask(project.id, task.id)}
+              activeOpacity={0.7}
+            >
+              <View
+                style={[
+                  styles.taskCheck,
+                  {
+                    borderColor: theme.border,
+                    backgroundColor: task.done ? meta.color : 'transparent',
+                  },
+                ]}
+              >
+                {task.done ? <Ionicons name="checkmark" size={10} color="#FFFFFF" /> : null}
+              </View>
+              <Text
+                style={[
+                  styles.taskText,
+                  { color: theme.text },
+                  task.done && styles.taskTextDone,
+                ]}
+                numberOfLines={1}
+              >
+                {task.title}
+              </Text>
+              <Text style={[styles.taskDue, { color: theme.textMuted }]}>{task.due}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View style={styles.collabRow}>
+          <Text style={[styles.collabLabel, { color: theme.textMuted }]}>Collaborators</Text>
+          <View style={styles.collabStack}>
+            {collaborators.slice(0, 3).map((collab, collabIndex) => (
+              <View
+                key={collab.id}
+                style={[
+                  styles.avatar,
+                  {
+                    backgroundColor: collab.color,
+                    marginLeft: collabIndex === 0 ? 0 : -8,
+                    borderColor: theme.card,
+                  },
+                ]}
+              >
+                <Text style={styles.avatarText}>{getInitials(collab.name)}</Text>
+              </View>
+            ))}
+            {collaborators.length > 3 ? (
+              <View style={[styles.avatarMore, { backgroundColor: theme.border }]}>
+                <Text style={[styles.avatarMoreText, { color: theme.textMuted }]}>
+                  +{collaborators.length - 3}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+          <Text style={[styles.collabText, { color: theme.textMuted }]}>
+            {collabSummary}
+            {collabOverflow}
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.viewTasksBtn, { borderColor: theme.border, backgroundColor: theme.card }]}
+          onPress={() => onOpenTasks(project)}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="list-outline" size={16} color={meta.color} />
+          <Text style={[styles.viewTasksText, { color: theme.text }]}>
+            View all tasks ({tasks.length})
+          </Text>
+          <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
+        </TouchableOpacity>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -166,6 +347,7 @@ function ProjectTaskTile({
 export default function ProjectScreen() {
   const { activeTheme, isDark } = useAppTheme();
   const primaryColor = Theme.brand.primary;
+  const handleBack = useDrawerBack();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -173,6 +355,7 @@ export default function ProjectScreen() {
   const [creating, setCreating] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [projectDetails, setProjectDetails] = useState<Record<string, ProjectDetails>>({});
 
   const dotOpacity = useSharedValue(1);
 
@@ -194,6 +377,24 @@ export default function ProjectScreen() {
   useEffect(() => {
     void fetchProjects();
   }, []);
+
+  useEffect(() => {
+    setProjectDetails((prev) => {
+      const next = { ...prev };
+      const ids = new Set(projects.map((project) => project.id));
+      Object.keys(next).forEach((id) => {
+        if (!ids.has(id)) {
+          delete next[id];
+        }
+      });
+      projects.forEach((project) => {
+        if (!next[project.id]) {
+          next[project.id] = buildProjectDetails(project);
+        }
+      });
+      return next;
+    });
+  }, [projects]);
 
   const animatedDotStyle = useAnimatedStyle(() => ({
     opacity: dotOpacity.value,
@@ -299,6 +500,26 @@ export default function ProjectScreen() {
     ]);
   }, []);
 
+  const onToggleTask = useCallback((projectId: string, taskId: string) => {
+    setProjectDetails((prev) => {
+      const current = prev[projectId];
+      if (!current) {
+        return prev;
+      }
+      const tasks = current.tasks.map((task) =>
+        task.id === taskId ? { ...task, done: !task.done } : task
+      );
+      return { ...prev, [projectId]: { ...current, tasks } };
+    });
+  }, []);
+
+  const onOpenTasks = useCallback((project: Project) => {
+    router.push({
+      pathname: '/project-tasks',
+      params: { id: project.id, title: project.title },
+    });
+  }, []);
+
   return (
     <View style={[styles.container, { backgroundColor: activeTheme.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
@@ -313,6 +534,33 @@ export default function ProjectScreen() {
         ]}
       />
 
+      <SafeAreaView edges={['top']} style={styles.safeArea}>
+        <View style={styles.headerBar}>
+          <TouchableOpacity
+            style={[styles.backButton, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}
+            onPress={handleBack}
+          >
+            <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
+          </TouchableOpacity>
+
+          <View style={styles.headerTitleWrap}>
+            <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Projects</Text>
+          </View>
+
+          <TouchableOpacity
+            style={[styles.headerAction, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}
+            onPress={onCreateProject}
+            disabled={creating}
+          >
+            {creating ? (
+              <ActivityIndicator size="small" color={Theme.brand.primary} />
+            ) : (
+              <Ionicons name="add" size={16} color={Theme.brand.primary} />
+            )}
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -320,58 +568,50 @@ export default function ProjectScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Theme.brand.primary} />
         }
       >
-        <View style={styles.header}>
-          <Animated.View entering={FadeInDown.duration(700)}>
-            <LinearGradient
-              colors={isDark ? [primaryColor, '#5A4CD7'] : [primaryColor, '#A79EFF']}
-              style={styles.projectGlow}
+        <Animated.View
+          entering={FadeInDown.duration(650)}
+          style={[styles.heroCard, { backgroundColor: activeTheme.card, borderColor: activeTheme.border }]}
+        >
+          <View style={styles.heroTop}>
+            <View style={[styles.heroIcon, { backgroundColor: `${primaryColor}1A` }]}>
+              <Ionicons name="rocket" size={16} color={primaryColor} />
+            </View>
+            <View style={styles.heroTextWrap}>
+              <Text style={[styles.heroTitle, { color: activeTheme.text }]}>Mission Control</Text>
+            </View>
+            <View
+              style={[
+                styles.statusBadge,
+                {
+                  backgroundColor: isDark ? 'rgba(52,199,89,0.1)' : 'rgba(52,199,89,0.12)',
+                  borderColor: isDark ? 'rgba(52,199,89,0.24)' : 'rgba(52,199,89,0.35)',
+                },
+              ]}
             >
-              <View style={[styles.headerInner, { backgroundColor: activeTheme.background }]}>
-                <Ionicons name="rocket-sharp" size={16} color={activeTheme.text} />
-              </View>
-            </LinearGradient>
-          </Animated.View>
-
-          <Text style={[styles.mainTitle, { color: activeTheme.text }]}>Mission Control</Text>
-          <View
-            style={[
-              styles.statusBadge,
-              {
-                backgroundColor: isDark ? 'rgba(52,199,89,0.1)' : 'rgba(52,199,89,0.12)',
-                borderColor: isDark ? 'rgba(52,199,89,0.24)' : 'rgba(52,199,89,0.35)',
-              },
-            ]}
-          >
-            <Animated.View style={[styles.statusDot, animatedDotStyle]} />
-            <Text style={styles.statusText}>SYSTEMS: ACTIVE</Text>
+              <Animated.View style={[styles.statusDot, animatedDotStyle]} />
+              <Text style={styles.statusText}>ACTIVE</Text>
+            </View>
           </View>
-          <Text style={[styles.apiText, { color: activeTheme.textMuted }]}>API: {API_BASE_URL}</Text>
-        </View>
 
-        <BlurView intensity={isDark ? 20 : 60} tint={isDark ? 'dark' : 'light'} style={styles.statsBlur}>
-          <View
-            style={[
-              styles.statsContainer,
-              {
-                backgroundColor: activeTheme.card,
-                borderColor: activeTheme.border,
-              },
-            ]}
-          >
+          <View style={[styles.statsRow, { borderTopColor: activeTheme.border }]}>
             <View style={styles.statItem}>
               <Text style={[styles.statValue, { color: activeTheme.text }]}>{stats.active}</Text>
               <Text style={[styles.statLabel, { color: activeTheme.textMuted }]}>Active</Text>
             </View>
-            <View style={[styles.statItem, styles.statBorder, { borderColor: activeTheme.border }]}>
+            <View style={[styles.statDivider, { borderColor: activeTheme.border }]} />
+            <View style={styles.statItem}>
               <Text style={[styles.statValue, { color: primaryColor }]}>{stats.velocity}%</Text>
               <Text style={[styles.statLabel, { color: activeTheme.textMuted }]}>Velocity</Text>
             </View>
+            <View style={[styles.statDivider, { borderColor: activeTheme.border }]} />
             <View style={styles.statItem}>
               <Text style={[styles.statValue, { color: activeTheme.text }]}>{stats.done}</Text>
               <Text style={[styles.statLabel, { color: activeTheme.textMuted }]}>Done</Text>
             </View>
           </View>
-        </BlurView>
+
+          <Text style={[styles.apiText, { color: activeTheme.textMuted }]}>API: {API_BASE_URL}</Text>
+        </Animated.View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -397,11 +637,13 @@ export default function ProjectScreen() {
                 project={project}
                 index={index}
                 theme={activeTheme}
-                isDark={isDark}
+                details={projectDetails[project.id]}
                 updatingId={updatingId}
                 deletingId={deletingId}
                 onCycleStatus={onCycleStatus}
                 onDelete={onDeleteProject}
+                onOpenTasks={onOpenTasks}
+                onToggleTask={onToggleTask}
               />
             ))
           )}
@@ -422,23 +664,11 @@ export default function ProjectScreen() {
             <Text style={styles.actionBtnText}>INITIALIZE NEW BUILD</Text>
           </LinearGradient>
         </TouchableOpacity>
-      </ScrollView>
 
-      <View style={styles.footerBranding}>
-        <BlurView intensity={isDark ? 20 : 50} tint={isDark ? 'dark' : 'light'} style={styles.versionBlur}>
-          <View
-            style={[
-              styles.versionBadge,
-              {
-                backgroundColor: activeTheme.card,
-                borderColor: activeTheme.border,
-              },
-            ]}
-          >
-            <Text style={[styles.versionText, { color: activeTheme.textMuted }]}>PROTOCOL V.2.7.0</Text>
-          </View>
-        </BlurView>
-      </View>
+        <View style={styles.versionTag}>
+          <Text style={[styles.versionText, { color: activeTheme.textMuted }]}>PROTOCOL V.2.7.0</Text>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -455,96 +685,114 @@ const styles = StyleSheet.create({
     height: 240,
     borderRadius: 120,
   },
+  safeArea: {
+    paddingHorizontal: 20,
+    paddingTop: 6,
+  },
+  headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingBottom: 10,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitleWrap: { flex: 1 },
+  headerTitle: { fontSize: 22, fontWeight: '900', letterSpacing: -0.4 },
+  headerAction: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   scrollContent: {
-    paddingBottom: 160,
+    paddingBottom: 120,
   },
-  header: {
+  heroCard: {
+    marginHorizontal: 20,
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1,
+    marginBottom: 26,
+  },
+  heroTop: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 80,
-    marginBottom: 35,
+    gap: 12,
   },
-  projectGlow: {
-    width: 92,
-    height: 92,
-    borderRadius: 30,
-    padding: 2,
+  heroIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    transform: [{ rotate: '45deg' }],
   },
-  headerInner: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    transform: [{ rotate: '-45deg' }],
-  },
-  mainTitle: {
-    fontSize: 32,
-    fontWeight: '900',
-    marginTop: 24,
-    letterSpacing: -1,
-  },
+  heroTextWrap: { flex: 1 },
+  heroTitle: { fontSize: 18, fontWeight: '900' },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 15,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
     borderWidth: 1,
   },
   statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: '#34C759',
-    marginRight: 10,
+    marginRight: 6,
   },
   statusText: {
     color: '#34C759',
     fontSize: 10,
     fontWeight: '900',
-    letterSpacing: 1.5,
+    letterSpacing: 1,
   },
-  apiText: {
-    marginTop: 10,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  statsBlur: {
-    marginHorizontal: 24,
-    borderRadius: 28,
-    overflow: 'hidden',
-  },
-  statsContainer: {
+  statsRow: {
+    marginTop: 16,
+    borderTopWidth: 1,
+    paddingTop: 14,
     flexDirection: 'row',
-    borderRadius: 28,
-    padding: 24,
-    borderWidth: 1,
+    alignItems: 'center',
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
   },
-  statBorder: {
+  statDivider: {
+    width: 1,
+    height: 36,
     borderLeftWidth: 1,
-    borderRightWidth: 1,
+    opacity: 0.6,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '900',
   },
   statLabel: {
     fontSize: 11,
-    fontWeight: '800',
-    marginTop: 6,
+    fontWeight: '700',
+    marginTop: 4,
     textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  apiText: {
+    marginTop: 12,
+    fontSize: 11,
+    fontWeight: '600',
   },
   section: {
-    paddingHorizontal: 24,
-    marginTop: 40,
+    paddingHorizontal: 20,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -581,20 +829,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   tile: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 18,
-    borderRadius: 24,
+    padding: 16,
+    borderRadius: 22,
     marginBottom: 14,
     borderWidth: 1,
   },
+  tileHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   iconBox: {
-    width: 50,
-    height: 50,
-    borderRadius: 16,
+    width: 46,
+    height: 46,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 14,
   },
   tileContent: {
     flex: 1,
@@ -619,15 +869,134 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
-  chevronBg: {
-    width: 30,
-    height: 30,
-    borderRadius: 10,
+  statusChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  statusChipText: {
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  progressRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 14,
+  },
+  progressLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  progressValue: {
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  progressTrack: {
+    height: 6,
+    borderRadius: 999,
+    marginTop: 8,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 999,
+  },
+  tasksWrap: {
+    marginTop: 12,
+    gap: 8,
+  },
+  taskRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  taskCheck: {
+    width: 18,
+    height: 18,
+    borderRadius: 6,
+    borderWidth: 1,
+    alignItems: 'center',
     justifyContent: 'center',
+  },
+  taskText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  taskTextDone: {
+    textDecorationLine: 'line-through',
+    opacity: 0.6,
+  },
+  taskDue: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  collabRow: {
+    marginTop: 12,
+    gap: 6,
+  },
+  collabLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  collabStack: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
+  avatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  avatarMore: {
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: -8,
+  },
+  avatarMoreText: {
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  collabText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  viewTasksBtn: {
+    marginTop: 12,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  viewTasksText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '700',
+  },
   actionBtn: {
-    marginHorizontal: 24,
+    marginHorizontal: 20,
     marginTop: 14,
   },
   btnGradient: {
@@ -644,21 +1013,9 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 1,
   },
-  footerBranding: {
-    position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 44 : 36,
-    width: '100%',
+  versionTag: {
     alignItems: 'center',
-  },
-  versionBlur: {
-    borderRadius: 22,
-    overflow: 'hidden',
-  },
-  versionBadge: {
-    paddingHorizontal: 22,
-    paddingVertical: 10,
-    borderRadius: 22,
-    borderWidth: 1,
+    marginTop: 18,
   },
   versionText: {
     fontSize: 10,

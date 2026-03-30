@@ -18,6 +18,13 @@ npm --prefix services/api install
 copy services\\api\\.env.example services\\api\\.env
 ```
 
+Add your OpenAI key in `services/api/.env`:
+
+```bash
+OPENAI_API_KEY=your_key_here
+OPENAI_MODEL=gpt-4o-mini
+```
+
 ## 3) Start infra (from repo root)
 
 ```bash
@@ -35,6 +42,7 @@ npm run api:dev
 ```bash
 curl http://localhost:4000/health
 curl http://localhost:4000/health/deps
+curl -X POST http://localhost:4000/api/nexa/qa -H "Content-Type: application/json" -d "{\"question\":\"Explain photosynthesis in one sentence.\"}"
 ```
 
 ## Projects endpoint (Postgres-backed)

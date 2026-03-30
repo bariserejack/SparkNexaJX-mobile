@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import { Theme } from '../constants/Theme';
 import { useAppTheme } from '../lib/theme';
@@ -25,12 +25,25 @@ const ACCOUNT_OPTIONS: AccountOption[] = [
 
 export default function AccountScreen() {
   const { activeTheme } = useAppTheme();
+  const { from } = useLocalSearchParams<{ from?: string }>();
+
+  const handleBack = () => {
+    if (from === 'settings') {
+      router.replace('/settings');
+      return;
+    }
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace('/settings');
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: activeTheme.background }]}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={[styles.header, { borderBottomColor: activeTheme.border }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Account</Text>

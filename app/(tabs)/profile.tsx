@@ -33,6 +33,20 @@ const SIGNAL_GRID: SignalStat[] = [
 
 const NEURAL_SIGNALS = ['#ReactNative', '#Supabase', '#UIUX', '#NodeJS', '#SparkNexa'];
 
+const ORBIT_NODES = [
+  { label: 'Hardware', icon: 'hardware-chip-outline' as const, color: '#7C5CFF' },
+  { label: 'Systems', icon: 'cube-outline' as const, color: '#27C5FF' },
+  { label: 'Repair', icon: 'build-outline' as const, color: '#FF9F43' },
+  { label: 'Python', icon: 'code-slash-outline' as const, color: '#00C389' },
+];
+
+const ORBIT_POSITIONS = [
+  { top: 8, right: 32 },
+  { bottom: 24, right: 20 },
+  { bottom: 18, left: 24 },
+  { top: 18, left: 30 },
+];
+
 export default function ProfileScreen() {
   const { activeTheme, isDark } = useAppTheme();
   const navigation = useNavigation();
@@ -135,8 +149,8 @@ export default function ProfileScreen() {
                 <Text style={styles.noteText}>Signal online</Text>
               </View>
               <View style={styles.coverActions}>
-                <TouchableOpacity style={styles.coverEdit} onPress={() => router.push('/edit-profile')}>
-                  <Ionicons name="create-outline" size={16} color={activeTheme.text} />
+                <TouchableOpacity style={styles.coverCamera} onPress={() => router.push('/edit-profile')}>
+                  <Ionicons name="camera-outline" size={16} color={activeTheme.text} />
                   <View style={styles.coverIconAccent} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.coverMenu} onPress={() => router.push('/profile-settings')}>
@@ -155,8 +169,11 @@ export default function ProfileScreen() {
             <View style={styles.identityHead}>
               <View style={styles.profileAvatarWrap}>
                 <AppLogo size={82} bordered />
-                <TouchableOpacity style={[styles.profileAvatarEdit, { borderColor: activeTheme.border, backgroundColor: activeTheme.card }]} onPress={() => router.push('/edit-profile')}>
-                  <Ionicons name="create-outline" size={16} color={activeTheme.text} />
+                <TouchableOpacity
+                  style={[styles.profileAvatarCamera, { borderColor: activeTheme.border, backgroundColor: activeTheme.card }]}
+                  onPress={() => router.push('/edit-profile')}
+                >
+                  <Ionicons name="camera-outline" size={16} color={activeTheme.text} />
                   <View style={styles.coverIconAccent} />
                 </TouchableOpacity>
               </View>
@@ -195,6 +212,52 @@ export default function ProfileScreen() {
             </View>
           </View>
 
+          <View style={[styles.orbitCard, { backgroundColor: activeTheme.cardElevated, borderColor: activeTheme.border }]}>
+            <View style={styles.orbitHeader}>
+              <View>
+                <Text style={[styles.sectionTitle, { color: activeTheme.text }]}>Mastery Orbit</Text>
+              </View>
+              <View style={[styles.orbitBadge, { backgroundColor: Theme.brand.primary + '18' }]}>
+                <Ionicons name="sparkles-outline" size={14} color={Theme.brand.primary} />
+                <Text style={[styles.orbitBadgeText, { color: Theme.brand.primary }]}>Live</Text>
+              </View>
+            </View>
+
+            <View style={styles.orbitWrap}>
+              <View style={[styles.orbitRingOuter, { borderColor: activeTheme.border }]} />
+              <View style={[styles.orbitRingInner, { borderColor: activeTheme.border }]} />
+
+              <LinearGradient colors={Theme.brand.primaryGradient} style={styles.orbitCenter}>
+                <Ionicons name="school-outline" size={22} color="#FFFFFF" />
+                <Text style={styles.orbitCenterLabel}>Core Focus</Text>
+                <Text style={styles.orbitCenterValue}>Computer Eng.</Text>
+              </LinearGradient>
+
+              {ORBIT_NODES.map((node, index) => (
+                <View
+                  key={node.label}
+                  style={[
+                    styles.orbitNode,
+                    ORBIT_POSITIONS[index],
+                    { backgroundColor: node.color + '22', borderColor: node.color },
+                  ]}
+                >
+                  <Ionicons name={node.icon} size={14} color={node.color} />
+                </View>
+              ))}
+            </View>
+
+            <View style={styles.orbitProgress}>
+              <View style={[styles.orbitProgressTrack, { backgroundColor: activeTheme.border }]}>
+                <LinearGradient colors={Theme.brand.primaryGradient} style={[styles.orbitProgressFill, { width: '78%' }]} />
+              </View>
+              <View style={styles.orbitProgressRow}>
+                <Text style={[styles.orbitProgressText, { color: activeTheme.text }]}>78% to next level</Text>
+                <Text style={[styles.orbitProgressText, { color: activeTheme.textMuted }]}>Level 4</Text>
+              </View>
+            </View>
+          </View>
+
           <View style={styles.grid}>
             {SIGNAL_GRID.map((item) => (
               <View
@@ -223,11 +286,11 @@ export default function ProfileScreen() {
             <Text style={[styles.sectionTitle, { color: activeTheme.text }]}>Identity Details</Text>
             <View style={styles.infoRow}>
               <Ionicons name="location-outline" size={16} color={activeTheme.textMuted} />
-              <Text style={[styles.infoText, { color: activeTheme.text }]}>Uyo, Akwa Ibom, Nigeria</Text>
+              <Text style={[styles.infoText, { color: activeTheme.text }]}>Location</Text>
             </View>
             <View style={styles.infoRow}>
               <Ionicons name="school-outline" size={16} color={activeTheme.textMuted} />
-              <Text style={[styles.infoText, { color: activeTheme.text }]}>Computer Engineering</Text>
+              <Text style={[styles.infoText, { color: activeTheme.text }]}>Education</Text>
             </View>
             <View style={styles.infoRow}>
               <Ionicons name="sparkles-outline" size={16} color={activeTheme.textMuted} />
@@ -315,7 +378,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
-  coverEdit: {
+  coverCamera: {
     width: 30,
     height: 30,
     borderRadius: 10,
@@ -361,7 +424,7 @@ const styles = StyleSheet.create({
     width: 82,
     height: 82,
   },
-  profileAvatarEdit: {
+  profileAvatarCamera: {
     position: 'absolute',
     right: -4,
     bottom: -4,
@@ -463,6 +526,104 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
+  },
+  orbitCard: {
+    marginTop: 16,
+    borderRadius: 22,
+    borderWidth: 1,
+    padding: 16,
+  },
+  orbitHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  orbitBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  orbitBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  orbitWrap: {
+    marginTop: 16,
+    height: 190,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  orbitRingOuter: {
+    position: 'absolute',
+    width: 170,
+    height: 170,
+    borderRadius: 999,
+    borderWidth: 1.2,
+    borderStyle: 'dashed',
+  },
+  orbitRingInner: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+  },
+  orbitCenter: {
+    width: 96,
+    height: 96,
+    borderRadius: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  orbitCenterLabel: {
+    color: 'rgba(255,255,255,0.78)',
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  orbitCenterValue: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  orbitNode: {
+    position: 'absolute',
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  orbitProgress: {
+    marginTop: 8,
+    gap: 8,
+  },
+  orbitProgressTrack: {
+    height: 8,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  orbitProgressFill: {
+    height: '100%',
+    borderRadius: 999,
+  },
+  orbitProgressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  orbitProgressText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   grid: {
     marginTop: 16,

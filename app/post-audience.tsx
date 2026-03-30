@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import { Theme } from '../constants/Theme';
 import { useAppTheme } from '../lib/theme';
@@ -11,19 +11,31 @@ type AudienceOption = {
   key: string;
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
-  sub: string;
 };
 
 const AUDIENCE_OPTIONS: AudienceOption[] = [
-  { key: 'public', icon: 'earth-outline', label: 'Public', sub: 'Anyone on or off SparkNexa' },
-  { key: 'friends', icon: 'people-outline', label: 'Friends', sub: 'Your friends on SparkNexa' },
-  { key: 'friends_except', icon: 'people-circle-outline', label: 'Friends except...', sub: "Don't show to some friends" },
-  { key: 'specific_friends', icon: 'person-outline', label: 'Specific friends', sub: 'Only show to some friends' },
-  { key: 'only_me', icon: 'lock-closed-outline', label: 'Only me', sub: 'Only me' },
+  { key: 'public', icon: 'earth-outline', label: 'Public' },
+  { key: 'friends', icon: 'people-outline', label: 'Friends' },
+  { key: 'friends_except', icon: 'people-circle-outline', label: 'Friends except...' },
+  { key: 'specific_friends', icon: 'person-outline', label: 'Specific friends' },
+  { key: 'only_me', icon: 'lock-closed-outline', label: 'Only me' },
 ];
 
 export default function PostAudienceScreen() {
   const { activeTheme } = useAppTheme();
+  const { from } = useLocalSearchParams<{ from?: string }>();
+
+  const handleBack = () => {
+    if (from === 'settings') {
+      router.replace('/settings');
+      return;
+    }
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace('/settings');
+  };
   const [selectedAudience, setSelectedAudience] = useState('public');
   const [setDefault, setSetDefault] = useState(true);
 
@@ -36,7 +48,7 @@ export default function PostAudienceScreen() {
     <View style={[styles.container, { backgroundColor: activeTheme.background }]}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={[styles.header, { borderBottomColor: activeTheme.border }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={16} color={activeTheme.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: activeTheme.text }]}>Who can see your post?</Text>
@@ -63,7 +75,6 @@ export default function PostAudienceScreen() {
                     </View>
                     <View style={styles.optionTextWrap}>
                       <Text style={[styles.optionLabel, { color: activeTheme.text }]}>{item.label}</Text>
-                      <Text style={[styles.optionSub, { color: activeTheme.textMuted }]}>{item.sub}</Text>
                     </View>
                     <View
                       style={[
@@ -96,7 +107,7 @@ export default function PostAudienceScreen() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.doneButton, { backgroundColor: Theme.brand.primary }]} onPress={() => router.back()}>
+          <TouchableOpacity style={[styles.doneButton, { backgroundColor: Theme.brand.primary }]} onPress={handleBack}>
             <Text style={styles.doneText}>Done</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -143,7 +154,6 @@ const styles = StyleSheet.create({
   },
   optionTextWrap: { flex: 1, paddingRight: 10 },
   optionLabel: { fontSize: 16, fontWeight: '700', letterSpacing: -0.1 },
-  optionSub: { marginTop: 1, fontSize: 13, fontWeight: '500', lineHeight: 18 },
   radioOuter: {
     width: 24,
     height: 24,
